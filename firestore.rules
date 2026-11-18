@@ -9,7 +9,7 @@ service cloud.firestore {
     // 배우자와 공유하려면 uid 를 하나 더 추가하세요.
     function isOwner() {
       return request.auth != null
-        && request.auth.uid in ['REPLACE_WITH_YOUR_UID'];
+        && request.auth.uid in ['FHgQUGnrkMg09NkPvr85at60lg53', 'kNFjbUsuOIa3Vx0CSmU2df83NIj2'];
     }
 
     function validTransaction() {
