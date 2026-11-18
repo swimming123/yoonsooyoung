@@ -2,7 +2,8 @@
 import { ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { firebaseConfigured } from '@/lib/firebaseConfig'
+import { firebaseConfigured, firebaseOptions } from '@/lib/firebaseConfig'
+import { authErrorCode, authErrorMessage } from '@/lib/authErrors'
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -10,7 +11,10 @@ const router = useRouter()
 const email = ref('')
 const password = ref('')
 const error = ref('')
+const errorCode = ref('')
 const busy = ref(false)
+// 어느 Firebase 프로젝트로 빌드됐는지 확인용(공개 값)
+const projectId = firebaseOptions.projectId
 
 if (firebaseConfigured) void authStore.init()
 
@@ -24,6 +28,7 @@ watchEffect(() => {
 
 async function login() {
   error.value = ''
+  errorCode.value = ''
   if (!email.value.trim() || !password.value) {
     error.value = '이메일과 비밀번호를 입력해 주세요.'
     return
@@ -31,8 +36,10 @@ async function login() {
   busy.value = true
   try {
     await authStore.login(email.value.trim(), password.value)
-  } catch {
-    error.value = '로그인에 실패했어요. 이메일과 비밀번호를 확인해 주세요.'
+  } catch (e) {
+    console.error('로그인 실패', e)
+    errorCode.value = authErrorCode(e)
+    error.value = authErrorMessage(errorCode.value)
   } finally {
     busy.value = false
   }
@@ -58,13 +65,19 @@ async function login() {
         <input v-model="password" type="password" autocomplete="current-password" />
       </label>
       <button class="primary" type="submit" :disabled="busy">로그인</button>
-      <p v-if="error" class="muted">{{ error }}</p>
+      <p v-if="error" class="error">
+        {{ error }}
+        <small v-if="errorCode" class="muted">오류 코드: {{ errorCode }}</small>
+      </p>
     </form>
     <p class="muted">웨딩플래너에서 쓰던 계정으로 로그인하세요.</p>
+    <p class="muted small">Firebase 프로젝트: {{ projectId }}</p>
   </template>
 </template>
 
 <style scoped>
 .login-form { display: flex; flex-direction: column; gap: 12px; max-width: 320px; }
 .login-form label { display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem; color: var(--muted); }
+.error { color: var(--expense); margin: 0; display: flex; flex-direction: column; gap: 2px; }
+.small { font-size: 0.8rem; }
 </style>
