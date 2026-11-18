@@ -7,7 +7,10 @@ import { firebaseConfigured } from '@/lib/firebaseConfig'
 const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
+const email = ref('')
+const password = ref('')
 const error = ref('')
+const busy = ref(false)
 
 if (firebaseConfigured) void authStore.init()
 
@@ -21,10 +24,17 @@ watchEffect(() => {
 
 async function login() {
   error.value = ''
+  if (!email.value.trim() || !password.value) {
+    error.value = '이메일과 비밀번호를 입력해 주세요.'
+    return
+  }
+  busy.value = true
   try {
-    await authStore.login()
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : String(e)
+    await authStore.login(email.value.trim(), password.value)
+  } catch {
+    error.value = '로그인에 실패했어요. 이메일과 비밀번호를 확인해 주세요.'
+  } finally {
+    busy.value = false
   }
 }
 </script>
@@ -38,7 +48,23 @@ async function login() {
     <p v-if="authStore.isLoggedIn && !authStore.isOwner" class="notice">
       {{ authStore.user?.email }} 계정은 이 화면에 접근할 수 없어요.
     </p>
-    <button class="primary" @click="login">Google 계정으로 로그인</button>
-    <p v-if="error" class="muted">{{ error }}</p>
+    <form class="login-form" @submit.prevent="login">
+      <label>
+        이메일
+        <input v-model="email" type="email" autocomplete="username" />
+      </label>
+      <label>
+        비밀번호
+        <input v-model="password" type="password" autocomplete="current-password" />
+      </label>
+      <button class="primary" type="submit" :disabled="busy">로그인</button>
+      <p v-if="error" class="muted">{{ error }}</p>
+    </form>
+    <p class="muted">웨딩플래너에서 쓰던 계정으로 로그인하세요.</p>
   </template>
 </template>
+
+<style scoped>
+.login-form { display: flex; flex-direction: column; gap: 12px; max-width: 320px; }
+.login-form label { display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem; color: var(--muted); }
+</style>

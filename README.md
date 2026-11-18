@@ -5,6 +5,8 @@ Vue 3 + Firebase 로 만들고 GitHub Pages 로 배포합니다.
 
 - 사이트: https://swimming123.github.io/yoonsooyoung/
 - 블로그는 누구나, 가계부·웨딩플래너는 주인 계정으로 로그인해야 볼 수 있습니다.
+- 웨딩플래너의 공개 타임라인(`/wedding/timeline.html`)과 모바일 청첩장(`/wedding/invite.html`)은 누구나 볼 수 있습니다.
+- Firebase 프로젝트는 기존 웨딩플래너가 쓰던 `wedding-log-ab8be` 를 그대로 씁니다.
 
 ## 구조
 
@@ -12,8 +14,8 @@ Vue 3 + Firebase 로 만들고 GitHub Pages 로 배포합니다.
 | --- | --- | --- |
 | 블로그 | `content/posts/*.md` (빌드할 때 묶음) | `src/features/blog/` |
 | 가계부 | Firestore `ledger_*` 컬렉션 | `src/features/ledger/` |
-| 웨딩플래너 | Firestore (기존) | 1단계 `public/wedding/`, 2단계 `src/features/wedding/` |
-| 로그인 | Firebase Auth (Google) | `src/stores/auth.ts` |
+| 웨딩플래너 | Firestore `app/*`, `guests`, `moodboard*`, `invitationPhotos` (기존 그대로) | 1단계 `public/wedding/`, 2단계 `src/features/wedding/` |
+| 로그인 | Firebase Auth (이메일/비밀번호, 웨딩플래너 계정 그대로) | `src/stores/auth.ts` |
 
 ```
 content/posts/        블로그 글(마크다운)
@@ -48,13 +50,12 @@ npm run build                 # 타입 체크 + 빌드
 
 ## Firebase 설정
 
-1. Firebase 콘솔에서 웹 앱 설정값을 복사해 `.env.local` 에 넣습니다.
-2. **Authentication → 로그인 방법**에서 Google 을 켭니다.
-3. **Authentication → 설정 → 승인된 도메인**에 `swimming123.github.io` 를 추가합니다.
-4. 한 번 로그인한 뒤 **Authentication → 사용자**에서 내 uid 를 복사해
-   - `firestore.rules` 의 `REPLACE_WITH_YOUR_UID` 를 바꾸고
-   - `.env.local` 과 GitHub 변수의 `VITE_OWNER_UIDS` 에 넣습니다.
-5. 규칙 배포: `npx firebase-tools deploy --only firestore:rules`
+1. Firebase 콘솔(`wedding-log-ab8be`)에서 웹 앱 설정값을 복사해 `.env.local` 에 넣습니다.
+2. **Authentication → 사용자**에서 웨딩플래너에 로그인하던 계정들의 uid 를 모두 복사해
+   - `firestore.rules` 의 `REPLACE_WITH_YOUR_UID` 자리에 넣고 (여러 개면 `['uid1', 'uid2']`)
+   - `.env.local` 과 GitHub 변수 `VITE_OWNER_UIDS` 에 쉼표로 넣습니다.
+3. 규칙 적용: **Firestore Database → 규칙** 탭에 `firestore.rules` 내용을 붙여넣고 「게시」.
+   (CLI 를 쓴다면 `npx firebase-tools deploy --only firestore:rules`)
 
 > 공개 레포라서 Firebase 설정값은 누구나 볼 수 있습니다(원래 공개되는 값이라 괜찮습니다).
 > 그래서 **`firestore.rules` 가 유일한 방어선**입니다. 규칙을 테스트 모드(모두 허용)로 두지 마세요.
