@@ -59,9 +59,10 @@ export const useAuthStore = defineStore('auth', () => {
     () => user.value !== null && (ownerUids.length === 0 || ownerUids.includes(user.value.uid)),
   )
 
-  async function login() {
+  /** 웨딩플래너에서 쓰던 이메일/비밀번호 계정으로 로그인합니다(같은 uid 를 그대로 사용). */
+  async function login(email: string, password: string) {
     const { auth, firebaseAuth } = await loadSdk()
-    await firebaseAuth.signInWithPopup(auth, new firebaseAuth.GoogleAuthProvider())
+    await firebaseAuth.signInWithEmailAndPassword(auth, email, password)
     rememberLogin(true)
   }
 

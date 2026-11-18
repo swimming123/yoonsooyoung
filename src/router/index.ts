@@ -6,6 +6,8 @@ declare module 'vue-router' {
     /** 주인으로 로그인해야 볼 수 있는 화면 */
     requiresOwner?: boolean
     title?: string
+    /** 본문 폭 제한 없이 넓게 보여줄 화면 */
+    wide?: boolean
   }
 }
 
@@ -36,7 +38,7 @@ export const router = createRouter({
       path: '/wedding',
       name: 'wedding',
       component: () => import('@/features/wedding/WeddingView.vue'),
-      meta: { requiresOwner: true, title: '웨딩플래너' },
+      meta: { requiresOwner: true, title: '웨딩플래너', wide: true },
     },
     {
       path: '/login',
