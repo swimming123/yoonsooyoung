@@ -1,31 +1,28 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-
-// 1단계: 기존 웨딩플래너 HTML 을 public/wedding/ 에 그대로 두고 iframe 으로 보여줍니다.
-// 같은 도메인이라 Firebase 로그인 상태가 공유됩니다.
+// 1단계: 기존 웨딩플래너(public/wedding/*.html)를 그대로 iframe 으로 보여줍니다.
+// 같은 도메인·같은 Firebase 프로젝트라서 데이터와 로그인 상태가 그대로 이어집니다.
 // 2단계에서 이 화면을 Vue 컴포넌트로 옮기고 Firestore 접근은 repository 로 감쌉니다.
-const src = `${import.meta.env.BASE_URL}wedding/index.html`
-const status = ref<'checking' | 'ready' | 'missing'>('checking')
-
-onMounted(async () => {
-  try {
-    const res = await fetch(src, { method: 'HEAD' })
-    status.value = res.ok ? 'ready' : 'missing'
-  } catch {
-    status.value = 'missing'
-  }
-})
+const base = `${import.meta.env.BASE_URL}wedding/`
+const editor = `${base}index.html`
+const timeline = `${base}timeline.html`
+const invite = `${base}invite.html`
 </script>
 
 <template>
-  <h1>웨딩플래너</h1>
-  <iframe v-if="status === 'ready'" :src="src" title="웨딩플래너" class="planner" />
-  <p v-else-if="status === 'missing'" class="notice">
-    아직 웨딩플래너 파일이 없어요. 기존 HTML·JS·CSS 파일을 <code>public/wedding/</code> 폴더에 넣고
-    시작 파일 이름을 <code>index.html</code> 로 맞춘 뒤 배포하세요.
-  </p>
+  <div class="head">
+    <h1>웨딩플래너</h1>
+    <nav class="links">
+      <a :href="editor" target="_blank" rel="noopener">새 창에서 열기 ↗</a>
+      <a :href="timeline" target="_blank" rel="noopener">공개 타임라인 ↗</a>
+      <a :href="invite" target="_blank" rel="noopener">모바일 청첩장 ↗</a>
+    </nav>
+  </div>
+  <iframe :src="editor" title="웨딩플래너" class="planner" />
 </template>
 
 <style scoped>
-.planner { width: 100%; height: 80vh; border: 1px solid var(--line); border-radius: 8px; }
+.head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.head h1 { margin: 0 0 12px; }
+.links { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.9rem; }
+.planner { width: 100%; height: calc(100vh - 170px); min-height: 520px; border: 1px solid var(--line); border-radius: 8px; }
 </style>

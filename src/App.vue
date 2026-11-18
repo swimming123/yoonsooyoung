@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { RouterLink, RouterView, useRouter } from 'vue-router'
+import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { hadLogin, useAuthStore } from '@/stores/auth'
 import { firebaseConfigured } from '@/lib/firebaseConfig'
 
 const authStore = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 onMounted(() => {
   // 로그인한 적 있는 브라우저에서만 Firebase 를 불러옵니다.
@@ -33,7 +34,7 @@ async function logout() {
       <RouterLink v-else-if="firebaseConfigured" to="/login">로그인</RouterLink>
     </div>
   </header>
-  <main class="container">
+  <main class="container" :class="{ wide: route.meta.wide }">
     <RouterView />
   </main>
 </template>

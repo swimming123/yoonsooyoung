@@ -1,0 +1,3013 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wedding Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css">
+<script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
+<style>
+  :root{
+    --primary:#1976D2;
+    --primary-dark:#115293;
+    --primary-light:#E3F2FD;
+    --bg:#FAFAFA;
+    --surface:#FFFFFF;
+    --border:#E0E0E0;
+    --divider:#EEEEEE;
+    --header-fill:#F5F5F5;
+    --text:#212121;
+    --text-secondary:#757575;
+    --success:#2E7D32; --success-bg:#E8F5E9;
+    --warning:#EF6C00; --warning-bg:#FFF3E0;
+    --error:#C62828; --error-bg:#FFEBEE;
+    --info:#1565C0; --info-bg:#E3F2FD;
+    --shadow:0 1px 2px rgba(0,0,0,0.12), 0 1px 1px rgba(0,0,0,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Roboto','Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    font-size:14px;
+  }
+  button, input, textarea{ font-family:inherit; }
+
+  /* ---------- App bar ---------- */
+  .appbar{ background:var(--surface); border-bottom:1px solid var(--border); }
+  .appbar-inner{
+    max-width:1000px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .appbar-title{ font-weight:700; font-size:16px; color:var(--text); }
+  .appbar-right{ display:flex; align-items:center; gap:14px; }
+  .user-email{ font-size:12.5px; color:var(--text-secondary); }
+  .text-btn{
+    background:none; border:none; color:var(--primary); font-size:13px; cursor:pointer; padding:4px 6px;
+  }
+  .text-btn:hover{ text-decoration:underline; }
+
+  .wrap{ max-width:1000px; margin:0 auto; padding:20px 20px 70px; }
+
+  /* ---------- Login ---------- */
+  .login-screen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--bg); padding:20px;
+  }
+  .login-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:4px; box-shadow:var(--shadow);
+    padding:32px 30px; width:100%; max-width:360px;
+  }
+  .login-title{ font-weight:700; font-size:18px; margin-bottom:4px; }
+  .login-sub{ font-size:12.5px; color:var(--text-secondary); margin-bottom:20px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12px; color:var(--text-secondary); margin-bottom:5px; }
+  .field input, .field textarea{
+    width:100%; font-size:14px; padding:9px 11px; border:1px solid var(--border); border-radius:4px;
+    background:#fff; color:var(--text);
+  }
+  .field input:focus, .field textarea:focus{ outline:none; border-color:var(--primary); box-shadow:0 0 0 2px var(--primary-light); }
+  .login-error{ font-size:12.5px; color:var(--error); margin:-4px 0 12px; min-height:16px; }
+  .btn-primary{
+    background:var(--primary); color:#fff; border:none; padding:10px 16px; border-radius:4px;
+    font-size:13.5px; font-weight:500; cursor:pointer;
+  }
+  .btn-primary:hover{ background:var(--primary-dark); }
+  .full-width{ width:100%; }
+  .btn-ghost{
+    background:none; border:1px solid var(--border); color:var(--text-secondary); padding:8px 14px;
+    border-radius:4px; cursor:pointer; font-size:13px;
+  }
+  .btn-ghost:hover{ border-color:var(--primary); color:var(--primary); }
+
+  /* ---------- Summary block ---------- */
+  .block{ background:var(--surface); border:1px solid var(--border); border-radius:4px; box-shadow:var(--shadow); }
+  .summary-block{ padding:18px 22px; margin-bottom:16px; }
+  .summary-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
+  .wedding-date-row{ font-size:13.5px; color:var(--text-secondary); }
+  .wedding-date-row b{ color:var(--text); font-weight:500; }
+  .date-edit-btn{
+    border:1px solid var(--border); background:#fff; color:var(--text-secondary);
+    font-size:12px; padding:4px 10px; border-radius:4px; cursor:pointer; margin-left:6px;
+  }
+  .date-edit-btn:hover{ border-color:var(--primary); color:var(--primary); }
+  .dday-number{ font-weight:700; font-size:34px; color:var(--primary); line-height:1; }
+  .date-edit-row{ display:none; align-items:center; gap:8px; margin-top:10px; }
+  .date-edit-row.open{ display:flex; }
+  .date-edit-row input[type=date]{
+    font-size:13.5px; padding:6px 9px; border:1px solid var(--border); border-radius:4px; background:#fff;
+  }
+
+  .now-banner{
+    margin-top:16px; padding:11px 14px; background:var(--info-bg); border-left:3px solid var(--primary);
+    border-radius:2px; font-size:13px;
+  }
+  .now-banner .now-label{ font-weight:500; color:var(--primary); font-size:11.5px; margin-bottom:2px; }
+  .now-banner.done-state{ background:var(--success-bg); border-left-color:var(--success); }
+  .now-banner.done-state .now-label{ color:var(--success); }
+  .now-banner .now-sub{ color:var(--text-secondary); font-size:12.5px; margin-top:2px; }
+
+  /* ---------- Tabs ---------- */
+  .tabs{ display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:16px; }
+  .tab-btn{
+    font-weight:500; font-size:14px; background:none; border:none; padding:11px 18px; cursor:pointer;
+    color:var(--text-secondary); border-bottom:2px solid transparent;
+  }
+  .tab-btn.active{ color:var(--primary); border-bottom-color:var(--primary); }
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+
+  /* ---------- Step blocks / sheet tables ---------- */
+  .step-block{ margin-bottom:14px; overflow:hidden; }
+  .step-bar{
+    display:flex; align-items:center; gap:10px; background:var(--header-fill); border-bottom:1px solid var(--border);
+    padding:9px 14px; cursor:pointer; user-select:none; flex-wrap:wrap;
+  }
+  .outline-toggle{
+    width:18px; height:18px; flex:0 0 auto; border:1px solid #BDBDBD; background:#fff; border-radius:2px;
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color:#616161;
+  }
+  .step-title{ font-weight:500; font-size:13.5px; color:var(--text); }
+  .step-when{ font-size:12px; color:var(--text-secondary); }
+  .step-num{ font-size:12px; color:var(--text-secondary); font-weight:500; flex:0 0 auto; }
+  .step-name-input{
+    border:none; background:transparent; font-weight:500; font-size:13.5px; color:var(--text);
+    padding:3px 5px; border-radius:3px; width:170px; min-width:90px;
+  }
+  .step-name-input:focus{ outline:2px solid var(--primary); outline-offset:-2px; background:#fff; }
+  .step-when-edit{ font-size:12px; color:var(--text-secondary); display:flex; align-items:center; gap:3px; white-space:nowrap; }
+  .step-months-input{
+    width:42px; border:none; background:transparent; font:inherit; color:var(--text-secondary); text-align:center;
+    padding:2px; border-radius:3px;
+  }
+  .step-months-input:focus{ outline:2px solid var(--primary); outline-offset:-2px; background:#fff; color:var(--text); }
+  .step-duedate-input{
+    border:none; background:transparent; font:inherit; color:var(--text-secondary);
+    padding:2px 3px; border-radius:3px;
+  }
+  .step-duedate-input:focus{ outline:2px solid var(--primary); outline-offset:-2px; background:#fff; color:var(--text); }
+  .step-dday-badge{ font-weight:700; color:var(--primary); font-size:12.5px; }
+  .step-when-sep{ color:var(--border); }
+  .step-del-btn{
+    background:none; border:none; color:#BDBDBD; font-size:14px; cursor:pointer; padding:2px 5px; flex:0 0 auto;
+  }
+  .step-del-btn:hover{ color:var(--error); }
+  .add-item-row td{ padding:8px 10px; background:#FAFAFA; }
+  .del-item-cell{ text-align:center; width:30px; }
+  .name-done-input{ text-decoration:line-through; color:var(--text-secondary); }
+  .step-bar-spacer{ flex:1 1 auto; }
+  .chip{ font-size:11px; font-weight:500; padding:3px 9px; border-radius:10px; white-space:nowrap; }
+  .chip-done{ background:var(--success-bg); color:var(--success); }
+  .chip-current{ background:var(--info-bg); color:var(--info); }
+  .chip-upcoming{ background:#EEEEEE; color:var(--text-secondary); }
+  .chip-overdue{ background:var(--error-bg); color:var(--error); }
+  .chip-unpaid{ background:var(--error-bg); color:var(--error); }
+  .chip-deposit{ background:var(--warning-bg); color:var(--warning); }
+  .chip-interim{ background:var(--info-bg); color:var(--info); }
+  .chip-paid{ background:var(--success-bg); color:var(--success); }
+  .progress-mini{ font-size:12px; color:var(--text-secondary); min-width:38px; text-align:right; }
+  .spend-mini{ font-size:12px; color:var(--primary); font-weight:500; }
+
+  .step-body{ display:none; }
+  .step-block.open .step-body{ display:block; }
+
+  .table-scroll{ overflow-x:auto; }
+  table.sheet{ width:100%; min-width:760px; border-collapse:collapse; font-size:12.8px; }
+  table.sheet th{
+    background:#FAFAFA; border:1px solid var(--border); padding:7px 10px; text-align:left;
+    font-weight:500; color:var(--text-secondary); white-space:nowrap; position:sticky; top:0;
+  }
+  table.sheet td{ border:1px solid var(--border); padding:0; vertical-align:middle; background:#fff; }
+  table.sheet tbody tr:hover td{ background:#FAFAFA; }
+  table.sheet td.static-cell{ padding:7px 10px; color:var(--text); }
+  table.sheet td.static-cell.muted{ color:var(--text-secondary); }
+  table.sheet td .cell-input{
+    width:100%; border:none; background:transparent; padding:7px 10px; font:inherit; color:var(--text);
+  }
+  table.sheet td .cell-input:focus{ outline:2px solid var(--primary); outline-offset:-2px; background:var(--primary-light); }
+  .check-cell{ text-align:center; width:34px; }
+  .item-check{
+    width:16px; height:16px; cursor:pointer; accent-color:var(--primary); vertical-align:middle;
+  }
+  .name-done{ text-decoration:line-through; color:var(--text-secondary); }
+
+  .exp-link-cell{ padding:5px 8px; }
+  .exp-link-empty-btn{
+    background:none; border:1px dashed #B0BEC5; color:var(--primary); font-size:11.5px; padding:4px 8px;
+    border-radius:4px; cursor:pointer; white-space:nowrap;
+  }
+  .exp-link-empty-btn:hover{ background:var(--primary-light); }
+  .exp-link-filled{ font-size:11.5px; display:flex; flex-direction:column; gap:3px; }
+  .exp-link-filled .amt{ font-weight:500; color:var(--primary); }
+  .exp-link-filled .lbtns{ display:flex; gap:8px; }
+  .exp-link-filled .lbtns button{
+    background:none; border:none; color:var(--text-secondary); font-size:11px; cursor:pointer; padding:0;
+  }
+  .exp-link-filled .lbtns button:hover{ color:var(--primary); text-decoration:underline; }
+  .exp-link-filled .lbtns button.unlink:hover{ color:var(--error); }
+
+  /* ---------- Expense sheet ---------- */
+  .exp-toolbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+  .exp-toolbar h3{ font-size:14.5px; font-weight:500; margin:0; }
+
+  .summary-strip{ display:flex; border:1px solid var(--border); border-radius:4px; overflow:hidden; margin-bottom:18px; background:#fff; }
+  .summary-cell{ flex:1; padding:13px 16px; border-right:1px solid var(--border); }
+  .summary-cell:last-child{ border-right:none; }
+  .summary-cell .label{ font-size:11.5px; color:var(--text-secondary); }
+  .summary-cell .value{ font-weight:700; font-size:18px; margin-top:3px; }
+  .summary-cell.accent .value{ color:var(--primary); }
+  .summary-cell.warn .value{ color:var(--error); }
+
+  table.exp-sheet{ width:100%; min-width:1080px; border-collapse:collapse; font-size:12.8px; }
+  table.exp-sheet th{
+    background:#FAFAFA; border:1px solid var(--border); padding:7px 10px; text-align:left; font-weight:500; color:var(--text-secondary); white-space:nowrap;
+  }
+  table.exp-sheet td{ border:1px solid var(--border); padding:0; vertical-align:middle; background:#fff; }
+  table.exp-sheet tbody tr:hover td{ background:#FAFAFA; }
+  table.exp-sheet td .cell-input{
+    width:100%; border:none; background:transparent; padding:7px 9px; font:inherit; color:var(--text);
+  }
+  table.exp-sheet td .cell-input:focus{ outline:2px solid var(--primary); outline-offset:-2px; background:var(--primary-light); }
+  table.exp-sheet td.num .cell-input{ text-align:right; }
+  table.exp-sheet td.status-cell{ padding:6px 8px; text-align:center; }
+  table.exp-sheet td.link-cell{ padding:6px 8px; font-size:11.5px; color:var(--text-secondary); }
+  table.exp-sheet td.del-cell{ text-align:center; width:36px; }
+  .del-icon-btn{
+    background:none; border:none; color:#BDBDBD; font-size:15px; cursor:pointer; padding:4px;
+  }
+  .del-icon-btn:hover{ color:var(--error); }
+
+  .add-row-btn{
+    background:none; border:1px dashed #B0BEC5; color:var(--primary); font-size:12.5px; padding:7px 12px;
+    border-radius:4px; cursor:pointer; margin-top:10px;
+  }
+  .add-row-btn:hover{ background:var(--primary-light); }
+
+  .empty-note{ text-align:center; color:var(--text-secondary); font-size:13px; padding:30px 10px; border:1px dashed var(--border); border-radius:4px; }
+
+  /* ---------- 시안(무드보드) ---------- */
+  .mb-tabbar{ display:flex; align-items:flex-end; gap:4px; flex-wrap:wrap; }
+  .mb-tab{
+    font-size:12.5px; padding:7px 10px; border-radius:4px 4px 0 0; cursor:pointer;
+    border:1px solid var(--border); border-bottom:none; background:var(--header-fill);
+    color:var(--text-secondary); display:flex; align-items:center; gap:6px;
+  }
+  .mb-tab.active{ background:var(--surface); color:var(--text); font-weight:500; }
+  .mb-tab-x{ width:14px; height:14px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:10px; color:var(--text-secondary); }
+  .mb-tab-x:hover{ background:var(--error-bg); color:var(--error); }
+  .mb-tab-add{ font-weight:700; }
+  .mb-tab-name-input{ font-size:12.5px; border:none; background:transparent; width:74px; font:inherit; color:var(--text); }
+  .mb-tab-name-input:focus{ outline:2px solid var(--primary); outline-offset:-2px; background:#fff; }
+  .mb-panel{ padding:16px; border-radius:0 4px 4px 4px; }
+  .mb-toolbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+  .mb-toolbar .hint{ font-size:12.5px; color:var(--text-secondary); }
+  .mb-sec-ctrl{ display:flex; align-items:center; gap:6px; }
+  .mb-sec-ctrl button{ padding:4px 9px; font-size:13px; }
+  .mb-sec-ctrl span{ font-size:12px; color:var(--text-secondary); min-width:52px; text-align:center; display:inline-block; }
+  .mb-board-frame{ width:100%; max-width:820px; aspect-ratio:297/210; margin:0 auto; }
+  .mb-board-row{ display:flex; flex-direction:row; gap:12px; height:100%; }
+  .mb-col{ flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:4px; height:100%; }
+  .mb-title-input{
+    width:100%; box-sizing:border-box; border:none; background:transparent; font-size:13px;
+    font-weight:500; padding:3px 4px; color:var(--text); flex:0 0 22px; border-radius:3px;
+  }
+  .mb-title-input:focus{ outline:2px solid var(--primary); outline-offset:-2px; background:#fff; }
+  .mb-layout-toggle{ display:flex; gap:2px; flex:0 0 20px; }
+  .mb-layout-btn{
+    flex:1; font-size:9.5px; padding:2px 3px; border:1px solid var(--border); background:#fff;
+    color:var(--text-secondary); cursor:pointer; border-radius:3px;
+  }
+  .mb-layout-btn.active{ background:var(--primary); color:#fff; border-color:var(--primary); }
+
+  /* ---------- 청첩장 관리 ---------- */
+  .invite-dropzone{
+    border:2px dashed var(--border); border-radius:6px; padding:26px 16px; text-align:center;
+    font-size:13px; color:var(--text-secondary); cursor:pointer; margin-bottom:12px;
+  }
+  .invite-dropzone.dragover{ border-color:var(--primary); background:var(--primary-light); color:var(--primary); }
+  .invite-photo-strip{ display:flex; gap:10px; flex-wrap:wrap; }
+  .invite-photo-card{ position:relative; width:110px; height:110px; border:1px solid var(--border); border-radius:6px; overflow:hidden; background:#FAFAFA; }
+  .invite-photo-card img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .invite-photo-card .mb-remove{ position:absolute; top:2px; right:2px; }
+  .invite-photo-order-btns{ position:absolute; bottom:2px; left:2px; display:flex; gap:2px; }
+  .invite-photo-order-btns button{
+    width:18px; height:18px; border-radius:3px; background:rgba(255,255,255,0.9); border:1px solid var(--border);
+    font-size:10px; cursor:pointer; color:var(--text-secondary); padding:0;
+  }
+
+  .invite-actions{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .invite-badge{ font-size:12px; padding:3px 8px; border-radius:10px; background:var(--header-fill); color:var(--text-secondary); margin-right:auto; }
+  .invite-badge.on{ background:var(--primary-light); color:var(--primary); font-weight:500; }
+  .invite-section-title{ font-size:13px; font-weight:500; margin-bottom:10px; }
+  .invite-section-title .hint, .field label .hint{ font-weight:400; }
+  .invite-blocks{ display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+  .invite-block{ border:1px solid var(--border); border-radius:6px; padding:8px 10px; background:#fff; }
+  .invite-block-head{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-secondary); }
+  .invite-block-head .spacer{ flex:1; }
+  .invite-block-head button{
+    width:22px; height:22px; border:1px solid var(--border); background:#fff; border-radius:3px;
+    cursor:pointer; font-size:11px; color:var(--text-secondary); padding:0;
+  }
+  .invite-block-head button:disabled{ opacity:.35; cursor:default; }
+  .invite-block-head button.del:hover{ background:var(--error-bg); color:var(--error); }
+  .invite-block textarea, .invite-block input[type=text]{ width:100%; margin-top:6px; box-sizing:border-box; font:inherit; font-size:13px; padding:6px 8px; border:1px solid var(--border); border-radius:4px; }
+  .invite-block .note{ font-size:12px; color:var(--text-secondary); margin-top:4px; }
+  .mt-conn{ margin-bottom:12px; }
+  .mt-conn summary{ cursor:pointer; color:var(--primary); font-size:13px; margin-bottom:8px; }
+  .mt-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .mt-row > .field{ flex:1 1 160px; }
+  .mt-row select{ padding:6px 8px; border:1px solid var(--border); border-radius:4px; font:inherit; font-size:13px; }
+  .mt-grid{ display:grid; grid-template-columns:1fr 340px; gap:20px; }
+  @media(max-width:900px){ .mt-grid{ grid-template-columns:1fr; } }
+  .mt-status{ font-size:13px; margin-top:10px; min-height:18px; white-space:pre-wrap; }
+  .mt-status.err{ color:var(--error); } .mt-status.ok{ color:#2E7D32; }
+  .mt-preview{ border:1px solid var(--border); border-radius:8px; overflow:hidden; background:#fff; margin-top:4px; }
+  .mt-preview-img{ aspect-ratio:1200/630; background:#EEE center/cover no-repeat; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); font-size:12px; }
+  .mt-preview-txt{ padding:10px 12px; }
+  .mt-preview-txt .t{ font-weight:500; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mt-preview-txt .d{ font-size:12px; color:var(--text-secondary); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .mt-preview-txt .u{ font-size:11px; color:#9E9E9E; margin-top:4px; }
+  .invite-add-row{ display:flex; gap:8px; }
+  .invite-add-row select{ flex:1; padding:6px 8px; border:1px solid var(--border); border-radius:4px; font:inherit; font-size:13px; }
+
+  /* ---------- 하객 관리 ---------- */
+  .guest-summary{ flex-wrap:wrap; }
+  .guest-summary .summary-cell{ flex:1 1 110px; min-width:110px; border-bottom:1px solid var(--border); }
+  .guest-summary .summary-cell .value{ font-size:17px; }
+  .guest-summary .summary-cell .sub{ font-size:11px; color:var(--text-secondary); margin-top:1px; }
+  .guest-toolbar{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .guest-filters{ display:flex; gap:6px; flex-wrap:wrap; }
+  .guest-actions{ display:flex; align-items:center; gap:10px; }
+  .guest-filter-input{
+    font:inherit; font-size:12.5px; padding:6px 9px; border:1px solid var(--border); border-radius:4px;
+    background:#fff; color:var(--text);
+  }
+  .guest-filter-input:focus{ outline:none; border-color:var(--primary); }
+  .guest-table-wrap{ max-height:62vh; overflow:auto; border:1px solid var(--border); border-radius:4px; }
+  table.guest-sheet{ min-width:1000px; }
+  table.guest-sheet thead th{ position:sticky; top:0; z-index:1; background:#FAFAFA; }
+  table.guest-sheet td.g-num{ text-align:center; color:var(--text-secondary); font-size:11.5px; width:36px; background:#FAFAFA; user-select:none; }
+  table.guest-sheet th.g-num{ text-align:center; width:36px; }
+  table.guest-sheet select.cell-input{ padding:7px 4px; cursor:pointer; }
+  table.guest-sheet td.num .cell-input{ text-align:right; }
+  table.guest-sheet td.g-del{ text-align:center; width:34px; }
+  table.guest-sheet td.g-check{ text-align:center; width:60px; }
+  table.guest-sheet tr.g-attend-yes td{ background:#F6FBF6; }
+  table.guest-sheet tr.g-attend-no td{ background:#FBF6F6; color:var(--text-secondary); }
+  table.guest-sheet tr.g-attend-no .cell-input{ color:var(--text-secondary); }
+  table.guest-sheet tr.g-attend-yes td.g-num, table.guest-sheet tr.g-attend-no td.g-num{ background:#FAFAFA; }
+  .guest-hint{ font-size:11.5px; color:var(--text-secondary); margin-top:10px; }
+  .mb-sub-row{ flex:2 1 0; min-height:0; display:flex; flex-direction:row; gap:4px; }
+  .mb-slot{
+    position:relative; width:100%; height:100%; border:1px solid var(--border); border-radius:4px;
+    overflow:hidden; background:#FAFAFA; cursor:pointer; box-sizing:border-box; min-width:0; min-height:0;
+  }
+  .mb-slot.selected{ border:2px solid var(--primary); }
+  .mb-slot.dragover{ border-color:var(--primary); background:var(--primary-light); }
+  .mb-photo{ width:100%; height:100%; object-fit:cover; display:block; }
+  .mb-placeholder{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%;
+    color:var(--text-secondary); gap:2px; font-size:10.5px; text-align:center; padding:0 4px;
+  }
+  .mb-remove{
+    position:absolute; top:2px; right:2px; width:16px; height:16px; border-radius:50%;
+    background:#fff; border:1px solid var(--border); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; padding:0; font-size:10px; color:var(--text-secondary); line-height:1;
+  }
+  .mb-remove:hover{ color:var(--error); border-color:var(--error-bg); }
+  .mb-kb-tag{
+    position:absolute; bottom:2px; left:2px; font-size:9px; background:rgba(255,255,255,0.9);
+    padding:1px 4px; border-radius:3px; color:var(--text-secondary);
+  }
+  .mb-caption{
+    width:100%; height:100%; box-sizing:border-box; resize:none; border:1px solid var(--border);
+    border-radius:4px; padding:6px 8px; font:inherit; font-size:12px; background:#fff; color:var(--text);
+  }
+  .mb-caption:focus{ outline:none; border-color:var(--primary); }
+
+  /* ---------- 인쇄/PDF ---------- */
+  .print-only{ display:none; }
+  @media print{
+    body *{ visibility:hidden; }
+    .print-only, .print-only *{ visibility:visible; }
+    .print-only{ display:block; position:absolute; top:0; left:0; width:100%; margin:0; padding:0; }
+    .print-page{
+      width:297mm; height:210mm; box-sizing:border-box; padding:10mm;
+      display:flex; flex-direction:row; gap:8mm; page-break-after:always;
+    }
+    .print-page:last-child{ page-break-after:auto; }
+    .print-col{ flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:4mm; }
+    .print-title{ font-size:14px; font-weight:600; color:#111; min-height:6mm; }
+    .print-main-photo{
+      flex:4 1 0; min-height:0; border:0.5px solid #ddd; display:flex;
+      align-items:center; justify-content:center; overflow:hidden;
+    }
+    .print-main-photo img{ max-width:100%; max-height:100%; object-fit:contain; }
+    .print-sub-row{ flex:2 1 0; min-height:0; display:flex; flex-direction:row; gap:2mm; }
+    .print-sub-photo{
+      flex:1 1 0; min-width:0; border:0.5px solid #ddd; display:flex;
+      align-items:center; justify-content:center; overflow:hidden;
+    }
+    .print-sub-photo img{ max-width:100%; max-height:100%; object-fit:contain; }
+    .print-caption{ flex:1.3 1 0; min-height:0; font-size:10.5px; color:#333; white-space:pre-wrap; overflow:hidden; }
+    @page{ size:A4 landscape; margin:0; }
+  }
+
+  /* ---------- 모달 ---------- */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(33,33,33,0.45); z-index:50;
+    align-items:center; justify-content:center; padding:16px;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal{
+    background:var(--surface); border-radius:6px; max-width:400px; width:100%; padding:22px 22px 18px;
+    box-shadow:0 12px 32px rgba(0,0,0,0.22); border:1px solid var(--border);
+  }
+  .modal h3{ margin:0 0 4px; font-size:16px; font-weight:500; }
+  .modal .modal-sub{ font-size:12.5px; color:var(--text-secondary); margin-bottom:14px; }
+  .modal-radio-row{ display:flex; align-items:center; gap:8px; font-size:13.5px; cursor:pointer; padding:8px 2px; }
+  .modal-radio-row input{ accent-color:var(--primary); width:15px; height:15px; }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:16px; }
+
+  /* ---------- 정보(마크다운 메모) ---------- */
+  .info-editor-wrap .EasyMDEContainer{ font-family:'Roboto', sans-serif; }
+  .info-editor-wrap .CodeMirror{
+    border:1px solid var(--border); border-radius:0 0 4px 4px; font-size:13.5px; color:var(--text);
+    min-height:420px;
+  }
+  .info-editor-wrap .editor-toolbar{ border:1px solid var(--border); border-bottom:none; border-radius:4px 4px 0 0; opacity:1; }
+  .info-editor-wrap .editor-toolbar a{ color:var(--text-secondary) !important; }
+  .info-editor-wrap .editor-toolbar a.active, .info-editor-wrap .editor-toolbar a:hover{
+    background:var(--primary-light); border-color:var(--border); color:var(--primary) !important;
+  }
+  .info-save-state{ font-size:11.5px; color:var(--text-secondary); }
+
+  footer{ text-align:center; font-size:11px; color:var(--text-secondary); margin-top:30px; }
+
+  @media (max-width:640px){
+    .dday-number{ font-size:28px; }
+    .summary-strip{ flex-wrap:wrap; }
+    .summary-cell{ flex:1 1 50%; border-bottom:1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-title">Wedding Log</div>
+    <div class="login-sub">등록된 계정으로 로그인하세요</div>
+    <div class="field">
+      <label>이메일</label>
+      <input type="email" id="loginEmail" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>비밀번호</label>
+      <input type="password" id="loginPassword" autocomplete="current-password">
+    </div>
+    <div class="login-error" id="loginError"></div>
+    <button class="btn-primary full-width" id="loginBtn">로그인</button>
+  </div>
+</div>
+
+<div id="appRoot" style="display:none;">
+  <div class="appbar">
+    <div class="appbar-inner">
+      <span class="appbar-title">Wedding Log</span>
+      <div class="appbar-right">
+        <span class="user-email" id="userEmail"></span>
+        <button class="text-btn" id="logoutBtn">로그아웃</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <div class="block summary-block">
+      <div class="summary-top">
+        <div>
+          <div class="wedding-date-row">
+            예식일 <b id="weddingDateText">-</b>
+            <button class="date-edit-btn" id="editDateBtn">날짜 수정</button>
+          </div>
+          <div class="date-edit-row" id="dateEditRow">
+            <input type="date" id="weddingDateInput">
+            <button class="btn-primary" id="saveDateBtn" style="padding:6px 12px;font-size:12.5px;">저장</button>
+          </div>
+        </div>
+        <div class="dday-number" id="ddayNumber">D-0</div>
+      </div>
+      <div class="now-banner" id="nowBanner">
+        <div class="now-label" id="nowLabel">지금 할 일</div>
+        <div id="nowStepName">불러오는 중...</div>
+        <div class="now-sub" id="nowStepSub"></div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="timeline">타임라인 · 체크리스트</button>
+      <button class="tab-btn" data-tab="expenses">지출 장부</button>
+      <button class="tab-btn" data-tab="moodboard">시안</button>
+      <button class="tab-btn" data-tab="infosheet">정보</button>
+      <button class="tab-btn" data-tab="invitation">청첩장 관리</button>
+      <button class="tab-btn" data-tab="guests">하객 관리</button>
+    </div>
+
+    <div class="panel active" id="panel-timeline">
+      <div id="timelineList"></div>
+      <button class="add-row-btn" id="addStepBtn">+ 새 단계 추가</button>
+    </div>
+
+    <div class="panel" id="panel-expenses">
+      <div class="summary-strip" id="expSummary"></div>
+      <div class="exp-toolbar">
+        <h3>지출 내역</h3>
+      </div>
+      <div class="table-scroll">
+        <table class="exp-sheet" id="expTable" style="display:none;">
+          <thead>
+            <tr>
+              <th>날짜</th><th>항목</th><th>업체</th><th>총금액</th><th>계약금</th><th>중도금</th><th>잔금</th>
+              <th>상태</th><th>메모</th><th>연결됨</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="expTableBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-note" id="expEmptyNote" style="display:none;">아직 등록된 지출이 없어요. 아래 버튼이나 타임라인의 각 항목에서 지출을 기록해보세요.</div>
+      <button class="add-row-btn" id="addExpRowBtn">+ 새 지출 행 추가</button>
+    </div>
+
+    <div class="panel" id="panel-moodboard">
+      <div class="mb-tabbar" id="mbTabBar"></div>
+      <div class="mb-panel block">
+        <div class="mb-toolbar">
+          <span class="hint">사진 칸을 클릭해 선택한 뒤 드래그하거나 Ctrl+V로 붙여넣으세요 · 보드 이름은 더블클릭해서 수정 · 섹션마다 "메인+서브"/"빅포토×2" 레이아웃 선택 가능</span>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <div class="mb-sec-ctrl">
+              <button id="mbSecMinus" class="btn-ghost">－</button>
+              <span id="mbSecCount">3개 섹션</span>
+              <button id="mbSecPlus" class="btn-ghost">＋</button>
+            </div>
+            <button id="mbClearBtn" class="btn-ghost">이 보드 지우기</button>
+            <button id="mbPrintBtn" class="btn-primary" style="padding:7px 14px;">PDF로 저장 / 출력</button>
+          </div>
+        </div>
+        <div class="mb-board-frame">
+          <div class="mb-board-row" id="mbBoardRow"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="print-only" id="printArea"></div>
+
+    <div class="modal-overlay" id="printModalOverlay">
+      <div class="modal">
+        <h3>PDF로 저장 / 출력</h3>
+        <div class="modal-sub">어떤 범위를 출력할까요?</div>
+        <label class="modal-radio-row">
+          <input type="radio" name="printScope" value="all" checked>
+          전체 보드 (<span id="printAllCount">0</span>개)
+        </label>
+        <label class="modal-radio-row">
+          <input type="radio" name="printScope" value="current">
+          지금 보고 있는 보드만 (<span id="printCurrentName">-</span>)
+        </label>
+        <div class="modal-actions">
+          <button class="btn-ghost" id="printModalCancelBtn">취소</button>
+          <button class="btn-primary" id="printModalConfirmBtn">출력 또는 저장하기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-infosheet">
+      <div class="block" style="padding:16px;">
+        <div class="mb-toolbar">
+          <span class="hint">마크다운으로 자유롭게 메모하세요. 목록·굵게·제목 등 지원돼요.</span>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span class="info-save-state" id="infoSaveState"></span>
+            <button id="infoDateBtn" class="btn-ghost">오늘 날짜 삽입 (F5)</button>
+          </div>
+        </div>
+        <div class="info-editor-wrap">
+          <textarea id="infoEditor"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-invitation">
+      <div class="block" style="padding:12px 16px 0; margin-bottom:16px;">
+        <div class="mb-toolbar">
+          <span class="hint">시안을 여러 개 만들어 두고, 대표 시안으로 지정한 것이 기본 링크(invite.html)에 보여져요. 탭 이름은 더블클릭해서 수정.</span>
+          <span class="info-save-state" id="inviteSaveState"></span>
+        </div>
+        <div class="mb-tabbar" id="inviteTabBar"></div>
+      </div>
+
+      <div class="block" style="padding:16px; margin-bottom:16px;" id="inviteDraftActions">
+        <div class="invite-actions">
+          <span class="invite-badge" id="inviteActiveBadge"></span>
+          <button class="btn-ghost" id="inviteSetActiveBtn">대표 시안으로 지정</button>
+          <button class="btn-ghost" id="inviteDuplicateBtn">시안 복제</button>
+          <button class="btn-ghost" id="inviteCopyLinkBtn">링크 복사</button>
+          <a class="btn-ghost" id="invitePreviewLink" target="_blank" rel="noopener" style="text-decoration:none;">미리보기 ↗</a>
+        </div>
+      </div>
+
+      <div class="block" style="padding:16px; margin-bottom:16px;">
+        <div class="invite-section-title">기본 정보 <span class="hint">(블록에서 이름·일시·장소로 표시돼요)</span></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="field"><label>신랑 이름</label><input type="text" id="inviteGroomName" placeholder="홍길동"></div>
+          <div class="field"><label>신부 이름</label><input type="text" id="inviteBrideName" placeholder="김철수"></div>
+          <div class="field"><label>예식 일시</label><input type="datetime-local" id="inviteDateTime"></div>
+          <div class="field"><label>장소명</label><input type="text" id="inviteVenueName" placeholder="OO웨딩홀 3층 그랜드홀"></div>
+          <div class="field" style="grid-column:1 / -1;"><label>장소 주소</label><input type="text" id="inviteVenueAddress" placeholder="서울시 OO구 OO로 123"></div>
+          <div class="field" style="grid-column:1 / -1;">
+            <label>네이버지도 검색어 <span class="hint">(비워두면 주소 → 장소명 순으로 검색)</span></label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="inviteMapQuery" placeholder="예: OO웨딩홀" style="flex:1;">
+              <a class="btn-ghost" id="inviteMapTestLink" target="_blank" rel="noopener" style="text-decoration:none; white-space:nowrap;">네이버지도 열기 ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block" style="padding:16px; margin-bottom:16px;">
+        <div class="invite-section-title">청첩장 구성 <span class="hint">(위에서 아래 순서로 표시 · 문구는 자유롭게 수정/추가/삭제)</span></div>
+        <div id="inviteBlocks" class="invite-blocks"></div>
+        <div class="invite-add-row">
+          <select id="inviteBlockType">
+            <option value="eyebrow">작은 문구 (예: WE ARE GETTING MARRIED)</option>
+            <option value="heading">제목 문구</option>
+            <option value="text">본문 글귀</option>
+            <option value="names">신랑·신부 이름</option>
+            <option value="photos">사진 슬라이드</option>
+            <option value="datetime">예식 일시</option>
+            <option value="venue">장소 + 네이버지도 버튼</option>
+            <option value="divider">구분선</option>
+          </select>
+          <button class="btn-primary" id="inviteAddBlockBtn">+ 블록 추가</button>
+        </div>
+      </div>
+
+      <div class="block" style="padding:16px; margin-bottom:16px;">
+        <div class="invite-section-title">링크 미리보기 (메타태그) <span class="hint">(카카오톡·문자로 링크를 보낼 때 뜨는 제목/설명/썸네일 · 모든 시안 공통 · invite.html 에 바로 저장)</span></div>
+        <details class="mt-conn" id="mtConn">
+          <summary>GitHub 연결 설정</summary>
+          <div class="mt-row">
+            <div class="field"><label>저장소 (소유자/이름)</label><input type="text" id="mtRepo" value="swimming123/yoonsooyoung"></div>
+            <div class="field"><label>브랜치</label><input type="text" id="mtBranch" value="main"></div>
+            <div class="field"><label>수정할 파일</label><input type="text" id="mtPath" value="public/wedding/invite.html"></div>
+          </div>
+          <div class="field">
+            <label>GitHub 토큰 (Fine-grained · 이 저장소만 · Contents: Read and write)</label>
+            <input type="password" id="mtToken" placeholder="github_pat_..." autocomplete="off">
+          </div>
+          <label class="hint" style="display:block; margin-bottom:6px;"><input type="checkbox" id="mtRemember"> 이 브라우저에 토큰 기억 (공용 PC에서는 체크하지 마세요)</label>
+          <div class="hint" style="line-height:1.7;">토큰 만들기: GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token → Repository access: <b>Only select repositories</b>(yoonsooyoung) → Permissions: <b>Contents: Read and write</b>. 토큰은 GitHub로만 전송돼요.</div>
+        </details>
+        <div class="mt-grid">
+          <div>
+            <div class="field"><label>제목</label><input type="text" id="mtTitle" placeholder="OO ♥ OO 결혼합니다"></div>
+            <div class="field"><label>설명</label><textarea id="mtDesc" rows="3" placeholder="2027년 5월 1일 토요일 오후 2시 · OO웨딩홀"></textarea></div>
+            <div class="field">
+              <label>썸네일 이미지 <span class="hint">(선택하지 않으면 기존 이미지 유지 · 1200×630, 300KB 이하로 자동 변환)</span></label>
+              <div class="mt-row" style="align-items:center;">
+                <select id="mtPhotoSel"></select>
+                <button class="btn-ghost" id="mtPhotoBtn">선택한 사진 사용</button>
+                <button class="btn-ghost" id="mtUploadBtn">내 이미지 파일</button>
+                <input type="file" id="mtFile" accept="image/*" style="display:none;">
+                <span class="hint" id="mtImgInfo"></span>
+              </div>
+              <label class="hint" style="display:block; margin-top:6px;"><input type="checkbox" id="mtStamp" checked> 파일명에 날짜 붙이기 (카카오 캐시로 이미지가 안 바뀌는 문제 방지)</label>
+            </div>
+            <div class="field"><label>현재 이미지 주소</label><input type="text" id="mtImgUrl" placeholder="https://.../og.jpg"></div>
+            <div class="field"><label>링크 주소 (og:url)</label><input type="text" id="mtPageUrl"></div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <button class="btn-ghost" id="mtLoadBtn">현재 값 불러오기</button>
+              <button class="btn-primary" id="mtSaveBtn">GitHub에 저장</button>
+            </div>
+            <div id="mtStatus" class="mt-status"></div>
+            <div class="hint" style="margin-top:6px; line-height:1.6;">저장 후 반영까지 1~2분 걸려요. 이미 공유한 링크는 <a href="https://developers.kakao.com/tool/debugger/sharing" target="_blank" rel="noopener">카카오 공유 디버거</a>에서 캐시를 초기화해주세요.</div>
+          </div>
+          <div>
+            <label class="hint">미리보기</label>
+            <div class="mt-preview">
+              <div class="mt-preview-img" id="mtPvImg">이미지 없음</div>
+              <div class="mt-preview-txt"><div class="t" id="mtPvTitle"></div><div class="d" id="mtPvDesc"></div><div class="u" id="mtPvUrl"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block" style="padding:16px;">
+        <div class="invite-section-title">사진 <span class="hint">(이 시안 전용 · 여러 장이면 좌우로 넘기는 슬라이드 · 드래그/Ctrl+V/클릭)</span></div>
+        <div id="inviteDropzone" class="invite-dropzone">
+          <span>사진을 드래그하거나 Ctrl+V, 클릭해서 추가하세요</span>
+          <input type="file" id="inviteFileInput" accept="image/*" multiple style="display:none;">
+        </div>
+        <div id="invitePhotoStrip" class="invite-photo-strip"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-guests">
+      <div class="summary-strip guest-summary" id="guestSummary"></div>
+      <div class="guest-toolbar">
+        <div class="guest-filters">
+          <input type="text" id="guestSearch" class="guest-filter-input" placeholder="이름·연락처·메모 검색">
+          <select id="guestFilterSide" class="guest-filter-input">
+            <option value="">구분 전체</option>
+            <option value="신랑측">신랑측</option>
+            <option value="신부측">신부측</option>
+          </select>
+          <select id="guestFilterAttend" class="guest-filter-input">
+            <option value="">참석 전체</option>
+            <option value="참석">참석</option>
+            <option value="불참">불참</option>
+            <option value="미정">미정</option>
+          </select>
+          <select id="guestFilterInvite" class="guest-filter-input">
+            <option value="">청첩장 전체</option>
+            <option value="미전달">미전달</option>
+            <option value="모바일">모바일</option>
+            <option value="실물">실물</option>
+          </select>
+        </div>
+        <div class="guest-actions">
+          <span class="info-save-state" id="guestCountState"></span>
+          <button id="guestCsvBtn" class="btn-ghost">엑셀(CSV) 내려받기</button>
+        </div>
+      </div>
+      <div class="table-scroll guest-table-wrap">
+        <table class="sheet guest-sheet" id="guestTable">
+          <thead>
+            <tr>
+              <th class="g-num">#</th><th>구분</th><th>관계</th><th>이름</th><th>연락처</th>
+              <th>인원</th><th>청첩장</th><th>참석</th><th>식권</th><th>축의금(원)</th><th>답례품 전달</th><th>메모</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="guestTableBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-note" id="guestEmptyNote" style="display:none;">아직 등록된 하객이 없어요. 아래 버튼으로 첫 행을 추가해보세요.</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="add-row-btn" id="guestAddRowBtn">+ 하객 행 추가</button>
+        <button class="add-row-btn" id="guestAdd5RowBtn">+ 5행 추가</button>
+      </div>
+      <div class="guest-hint">· 이름 칸에서 Enter를 누르면 아래에 새 행이 추가돼요 · 인원은 본인 포함 인원이에요 · 이 탭은 로그인한 사람만 볼 수 있어요</div>
+    </div>
+
+    <footer>변경 내용은 Firestore에 실시간으로 저장·동기화돼요.</footer>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+import {
+  getFirestore, doc, setDoc, updateDoc, deleteField, onSnapshot, collection, deleteDoc
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+/* ============ Firebase 초기화 ============ */
+const firebaseConfig = {
+  apiKey: "AIzaSyCv4C_YQfPmq3vWAzfH9hicceBKn7uGDcQ",
+  authDomain: "wedding-log-ab8be.firebaseapp.com",
+  projectId: "wedding-log-ab8be",
+  storageBucket: "wedding-log-ab8be.firebasestorage.app",
+  messagingSenderId: "1051939244748",
+  appId: "1:1051939244748:web:42e1b03187ce036f8c9069",
+  measurementId: "G-MMCL30SMFV"
+};
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+
+const settingsRef = doc(db, "app", "settings");
+const checklistRef = doc(db, "app", "checklist");
+const expensesRef = doc(db, "app", "expenses");
+const mbBoardsCol = collection(db, "moodboardBoards");
+const mbSectionsCol = collection(db, "moodboardSections");
+const infoRef = doc(db, "app", "infosheet");
+const invitationRef = doc(db, "app", "invitation");
+const invitationPhotosCol = collection(db, "invitationPhotos");
+const guestsCol = collection(db, "guests");
+
+
+/* ============ 기본 데이터 ============ */
+const DEFAULT_WEDDING_DATE = "2027-06-13";
+
+const DEFAULT_STEPS = [
+  { id:1, name:"Pre-Wedding", monthsBefore:15, desc:"양가인사 · 선물준비 · 계획세우기",
+    items:[
+      {name:"양가인사 날잡기", desc:"상견례까진 아니더라도 양가인사는!"},
+      {name:"양가인사 선물준비", desc:"한정선, 꽃바구니 추천"},
+      {name:"양가인사", desc:"보통 예약은 양가 부모님이"},
+      {name:"스드메 업체선정", desc:"이때는 업체별 비교만 먼저", vendor:"컬러인웨딩"}
+    ]},
+  { id:2, name:"Hall", monthsBefore:12, desc:"홀투어 · 홀관련예약 · 플래너계약",
+    items:[
+      {name:"암행홀투어", desc:"보통 당일계약 혜택이 커요. 맘에 드는 곳은 미리 가보는 걸 추천"},
+      {name:"홀 계약", desc:"홀 계약시 부가 서비스 꼼꼼히 따지기"},
+      {name:"홀 본식스냅 계약", desc:"홀 연계여부 필수 확인"},
+      {name:"홀 본식DVD 계약", desc:"홀 연계여부 필수 확인"},
+      {name:"플래너 계약", desc:"다이렉트웨딩 추천"}
+    ]},
+  { id:3, name:"스드메", monthsBefore:10, desc:"스드메 · 예복 및 관련 예약(헤어변형 등)",
+    items:[
+      {name:"스튜디오 확정", desc:""},
+      {name:"ㄴ 헤어변형 contact", desc:"스튜디오 확정하자마자"},
+      {name:"드레스 확정", desc:"드레스투어 or 지정"},
+      {name:"메이크업 확정", desc:"원하면 데모메이크업 잡기"},
+      {name:"예복 업체 확정", desc:"스튜디오 촬영 3개월 전에 필수"}
+    ]},
+  { id:4, name:"신혼준비", monthsBefore:7, desc:"신혼여행 · 신혼집 준비",
+    items:[
+      {name:"신혼집 투어 · 계약", desc:"신혼집은 빨리 구하는 게 좋아요"},
+      {name:"신혼여행 항공권", desc:"1년~7개월 전이 가장 저렴"},
+      {name:"신혼여행 호텔", desc:"무료취소 가능한 곳 선점"},
+      {name:"촬영 드레스 가봉", desc:"스튜디오 촬영 1개월 전 추천"}
+    ]},
+  { id:5, name:"스튜디오 촬영", monthsBefore:6, desc:"스튜디오 촬영 및 관련 준비",
+    items:[
+      {name:"촬영시연 준비", desc:""},
+      {name:"촬영장 소품준비", desc:""},
+      {name:"헤어변형 체크", desc:""}
+    ]},
+  { id:6, name:"청첩장 · 양가부모님", monthsBefore:3.5, desc:"상견례 · 혼주한복 · 청첩장 제작",
+    items:[
+      {name:"상견례", desc:"양가 상견례 일정 · 장소 잡기"},
+      {name:"혼주한복 준비", desc:"혼주(부모님) 한복 맞춤"},
+      {name:"청첩장 디자인 · 제작", desc:"시안 선택 및 제작 의뢰"},
+      {name:"모바일 청첩장 제작", desc:"모바일 청첩장 함께 준비"}
+    ]},
+  { id:7, name:"Hall 관련 준비들", monthsBefore:2, desc:"식전영상 · 식권대장 · 답례품준비",
+    items:[
+      {name:"식전영상 제작", desc:"업체 or 셀프 제작"},
+      {name:"식권대장 준비", desc:"하객 식사 인원 파악 및 예약"},
+      {name:"답례품 준비", desc:"종류 · 수량 결정 및 주문"},
+      {name:"청첩장 발송 시작", desc:"지인 · 직장 발송"}
+    ]},
+  { id:8, name:"본식 위한 최종 Check", monthsBefore:1, desc:"본식드레스가봉 · 웨딩홀미팅(리허설 등)",
+    items:[
+      {name:"본식 드레스 가봉", desc:"최종 피팅 확인"},
+      {name:"웨딩홀 최종 미팅", desc:"식순 · 리허설 협의"},
+      {name:"청첩장 최종 발송", desc:"마무리 발송"},
+      {name:"축의금 봉투 · 방명록 준비", desc:"소품 최종 점검"},
+      {name:"신랑신부 뷰티 준비", desc:"피부관리 · 헤어 예약 마무리"}
+    ]}
+];
+
+/* ============ 상태 ============ */
+let weddingDate = DEFAULT_WEDDING_DATE;
+let steps = null;
+let expenses = [];
+let unsubscribers = [];
+let pendingJumpExpId = null;
+let forceOpenStepId = null;
+
+// 시안(무드보드) 상태
+let mbBoards = [];
+let mbSections = [];
+let mbActiveBoardId = null;
+let mbSelectedKey = null;
+let mbEditingBoardId = null;
+let mbSeeded = false;
+let mbPrintScope = 'all';
+let infoContent = '';
+let infoEditor = null;
+let infoSaveTimer = null;
+let inviteDrafts = {}; let inviteActiveId = null; let inviteCurId = 'main'; let inviteEditingId = null; let inviteActiveSaved = false; let inviteHasDrafts = false;
+let invitationPhotos = [];
+let inviteSaveTimer = null;
+let guests = [];                    // 하객 목록 (order 순)
+const guestRowEls = new Map();      // 하객 id -> <tr>
+let guestPendingFocusId = null;     // 새로 추가한 행에 포커스를 주기 위한 id
+
+function sortStepsByDate(){
+  steps.sort((a,b)=> (Number(b.monthsBefore)||0) - (Number(a.monthsBefore)||0));
+}
+
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function compressImage(fileOrBlob){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 700;
+        const scale = Math.min(1, maxW / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const url = canvas.toDataURL('image/jpeg', 0.65);
+        const kb = Math.round((url.length * 0.75) / 1024);
+        resolve({url, kb});
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(fileOrBlob);
+  });
+}
+function fmtWon(n){ n = Number(n)||0; return n.toLocaleString('ko-KR') + '원'; }
+function fmtDate(d){
+  if(!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  if(isNaN(dt)) return d;
+  return `${dt.getFullYear()}.${String(dt.getMonth()+1).padStart(2,'0')}.${String(dt.getDate()).padStart(2,'0')}`;
+}
+function todayStr(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function subtractMonths(dateObj, months){
+  const d = new Date(dateObj);
+  const whole = Math.floor(months);
+  const frac = months - whole;
+  d.setMonth(d.getMonth() - whole);
+  if(frac) d.setDate(d.getDate() - Math.round(frac*30));
+  return d;
+}
+function daysBetween(a,b){
+  const MS = 86400000;
+  const da = new Date(a.getFullYear(),a.getMonth(),a.getDate());
+  const db2 = new Date(b.getFullYear(),b.getMonth(),b.getDate());
+  return Math.round((db2-da)/MS);
+}
+function findExpense(id){ return expenses.find(e => e.id === id) || null; }
+function findItem(stepId, itemId){
+  const step = steps.find(s => s.id === stepId);
+  if(!step) return {step:null, item:null};
+  const item = step.items.find(i => i.id === itemId);
+  return {step, item};
+}
+function stepShortTitle(step){ return step.name; }
+function monthsBeforeLabel(m){
+  m = Number(m)||0;
+  if(m <= 0) return 'D-DAY';
+  const y = Math.floor(m/12);
+  const rem = Math.round((m - y*12)*10)/10;
+  let label = 'D-';
+  if(y>0) label += `${y}년 `;
+  if(rem>0 || y===0) label += `${rem}개월`;
+  return label.trim();
+}
+
+/* ============ Firestore 저장 ============ */
+async function saveSettings(){
+  try{ await setDoc(settingsRef, {weddingDate}); }
+  catch(e){ console.error('settings save failed', e); }
+}
+async function saveChecklist(){
+  try{ await setDoc(checklistRef, {steps}); }
+  catch(e){ console.error('checklist save failed', e); }
+}
+async function saveExpenses(){
+  try{ await setDoc(expensesRef, {expenses}); }
+  catch(e){ console.error('expenses save failed', e); }
+}
+
+/* ============ 시안(무드보드) Firestore 저장/삭제 ============ */
+function emptyMbSection(boardId, order){
+  return {
+    id: uid(), boardId, order, title:'', caption:'', layout:'main-subs',
+    main:{image:null, kb:null},
+    secondMain:{image:null, kb:null},
+    subs:[{image:null,kb:null},{image:null,kb:null},{image:null,kb:null}]
+  };
+}
+function createMbBoard(order){
+  return { id: uid(), name: '보드 '+(order+1), order };
+}
+async function saveMbBoard(board){
+  try{ await setDoc(doc(db, 'moodboardBoards', board.id), board); }
+  catch(e){ console.error('board save failed', e); }
+}
+async function saveMbSection(section){
+  try{ await setDoc(doc(db, 'moodboardSections', section.id), section); }
+  catch(e){ console.error('section save failed', e); }
+}
+async function deleteMbSection(sectionId){
+  try{ await deleteDoc(doc(db, 'moodboardSections', sectionId)); }
+  catch(e){ console.error('section delete failed', e); }
+}
+async function deleteMbBoard(boardId){
+  try{
+    await deleteDoc(doc(db, 'moodboardBoards', boardId));
+    const toDelete = mbSections.filter(s => s.boardId === boardId);
+    await Promise.all(toDelete.map(s => deleteMbSection(s.id)));
+  }catch(e){ console.error('board delete failed', e); }
+}
+function mbBoardSections(boardId){
+  return mbSections.filter(s => s.boardId === boardId).sort((a,b)=> a.order-b.order);
+}
+async function seedFirstMbBoardIfEmpty(){
+  if(mbSeeded) return;
+  mbSeeded = true;
+  const board = createMbBoard(0);
+  await saveMbBoard(board);
+  const sections = [0,1,2].map(i => emptyMbSection(board.id, i));
+  await Promise.all(sections.map(saveMbSection));
+}
+
+/* ============ 정보(마크다운 메모) ============ */
+async function saveInfoNote(){
+  try{
+    await setDoc(infoRef, {content: infoContent});
+    const el = $('#infoSaveState');
+    if(el) el.textContent = '저장됨 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'});
+  }catch(e){ console.error('info note save failed', e); }
+}
+function scheduleInfoSave(){
+  if(!infoEditor) return;
+  infoContent = infoEditor.value();
+  const el = $('#infoSaveState');
+  if(el) el.textContent = '저장 중...';
+  clearTimeout(infoSaveTimer);
+  infoSaveTimer = setTimeout(saveInfoNote, 700);
+}
+function formatNowForNote(){
+  const d = new Date();
+  const days = ['일','월','화','수','목','금','토'];
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}(${days[d.getDay()]}) ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function insertDateAtCursor(){
+  const text = formatNowForNote();
+  if(infoEditor){
+    const cm = infoEditor.codemirror;
+    cm.replaceSelection(text);
+    cm.focus();
+    scheduleInfoSave();
+  }else{
+    const ta = document.getElementById('infoEditor');
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    ta.value = ta.value.slice(0,start) + text + ta.value.slice(end);
+    ta.selectionStart = ta.selectionEnd = start + text.length;
+    ta.focus();
+    infoContent = ta.value;
+    clearTimeout(infoSaveTimer);
+    infoSaveTimer = setTimeout(saveInfoNote, 300);
+  }
+}
+function initInfoEditor(){
+  const textareaEl = document.getElementById('infoEditor');
+  try{
+    if(typeof EasyMDE === 'undefined') throw new Error('EasyMDE not loaded');
+    infoEditor = new EasyMDE({
+      element: textareaEl,
+      spellChecker: false,
+      autofocus: false,
+      status: false,
+      placeholder: '자유롭게 메모하세요. "- "로 시작하면 목록, "# "로 시작하면 제목이 돼요.',
+      toolbar: ['bold','italic','heading','|','quote','unordered-list','ordered-list','|','link','|','preview','guide']
+    });
+    infoEditor.codemirror.on('change', scheduleInfoSave);
+    infoEditor.codemirror.on('blur', () => {
+      clearTimeout(infoSaveTimer);
+      if(infoEditor){ infoContent = infoEditor.value(); saveInfoNote(); }
+    });
+    infoEditor.codemirror.on('keydown', (cm, ev) => {
+      if(ev.key === 'F5'){
+        ev.preventDefault();
+        insertDateAtCursor();
+      }
+    });
+  }catch(err){
+    console.error('EasyMDE load failed, falling back to plain textarea', err);
+    infoEditor = null;
+    // 마크다운 에디터 로드에 실패해도 기본 메모장처럼은 동작하도록 대체 처리
+    textareaEl.style.cssText = 'width:100%; min-height:420px; box-sizing:border-box; border:1px solid var(--border); border-radius:4px; padding:12px; font:inherit; font-size:13.5px; resize:vertical;';
+    textareaEl.value = infoContent || '';
+    textareaEl.addEventListener('input', () => {
+      infoContent = textareaEl.value;
+      const el = $('#infoSaveState');
+      if(el) el.textContent = '저장 중...';
+      clearTimeout(infoSaveTimer);
+      infoSaveTimer = setTimeout(saveInfoNote, 700);
+    });
+    textareaEl.addEventListener('blur', () => {
+      clearTimeout(infoSaveTimer);
+      infoContent = textareaEl.value;
+      saveInfoNote();
+    });
+    textareaEl.addEventListener('keydown', ev => {
+      if(ev.key === 'F5'){
+        ev.preventDefault();
+        insertDateAtCursor();
+      }
+    });
+  }
+}
+function bindInfoSheet(){
+  $('#infoDateBtn').addEventListener('click', () => insertDateAtCursor());
+}
+
+/* ============ 청첩장 관리 ============ */
+const BLOCK_LABELS = {
+  photos:'사진 슬라이드', eyebrow:'작은 문구', heading:'제목 문구', names:'신랑·신부 이름',
+  text:'본문 글귀', divider:'구분선', datetime:'예식 일시', venue:'장소 + 네이버지도 버튼'
+};
+const TEXT_BLOCKS = ['eyebrow','heading','text'];
+function defaultBlocks(phrase){
+  return [
+    {id:uid(), type:'photos'},
+    {id:uid(), type:'eyebrow', text:'WE ARE GETTING MARRIED'},
+    {id:uid(), type:'names'},
+    {id:uid(), type:'text', text: phrase || '저희 두 사람이 사랑과 믿음으로 하나 되는 자리에 소중한 분들을 모시고자 합니다.'},
+    {id:uid(), type:'divider'},
+    {id:uid(), type:'datetime'},
+    {id:uid(), type:'venue'}
+  ];
+}
+function newDraft(name, order){
+  return { id:uid(), name:name, order:order, groomName:'', brideName:'', weddingDateTime:'', venueName:'', venueAddress:'', mapQuery:'', ogTitle:'', ogDescription:'', ogImage:'', blocks:defaultBlocks() };
+}
+function naverMapUrl(d){
+  const q = (d.mapQuery || d.venueAddress || d.venueName || '').trim();
+  return q ? 'https://map.naver.com/p/search/' + encodeURIComponent(q) : 'https://map.naver.com/';
+}
+function sortedDrafts(){
+  return Object.values(inviteDrafts).sort((a,b)=> (a.order||0)-(b.order||0));
+}
+function curDraft(){ return inviteDrafts[inviteCurId] || null; }
+function draftPhotos(id){
+  return invitationPhotos.filter(p => (p.inviteId || 'main') === id);
+}
+
+// 문서 → 로컬 상태 (구버전 평면 문서는 '메인 시안'으로 변환)
+function applyInviteSnapshot(data){
+  data = data || {};
+  let drafts = {};
+  if(data.drafts && Object.keys(data.drafts).length){
+    Object.keys(data.drafts).forEach(id => {
+      const d = data.drafts[id];
+      drafts[id] = Object.assign({id:id, name:'시안', order:0, groomName:'', brideName:'', weddingDateTime:'', venueName:'', venueAddress:'', mapQuery:'', ogTitle:'', ogDescription:'', ogImage:'', blocks:[]}, d);
+    });
+  }else{
+    drafts.main = {
+      id:'main', name:'메인 시안', order:0,
+      groomName:data.groomName||'', brideName:data.brideName||'', weddingDateTime:data.weddingDateTime||'',
+      venueName:data.venueName||'', venueAddress:data.venueAddress||'', mapQuery:'',
+      blocks: defaultBlocks(data.phrase)
+    };
+  }
+  // 편집 중인 현재 시안은 저장 대기 중이면 덮어쓰지 않음
+  if(inviteSaveTimer && inviteDrafts[inviteCurId]) drafts[inviteCurId] = inviteDrafts[inviteCurId];
+  inviteDrafts = drafts;
+  inviteActiveId = (data.activeId && drafts[data.activeId]) ? data.activeId : sortedDrafts()[0].id;
+  if(!inviteDrafts[inviteCurId]) inviteCurId = inviteActiveId;
+}
+
+async function saveDraftNow(d){
+  try{
+    const payload = { drafts: inviteHasDrafts ? { [d.id]: d } : Object.assign({}, inviteDrafts) };
+    if(!inviteActiveSaved) { payload.activeId = inviteActiveId; }
+    await setDoc(invitationRef, payload, {merge:true});
+    inviteActiveSaved = true; inviteHasDrafts = true;
+    const el = $('#inviteSaveState');
+    if(el) el.textContent = '저장됨 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'});
+  }catch(e){ console.error('invitation save failed', e); }
+}
+async function saveCurDraft(){
+  inviteSaveTimer = null;
+  const d = curDraft();
+  if(d) await saveDraftNow(d);
+}
+function scheduleInviteSave(){
+  const el = $('#inviteSaveState');
+  if(el) el.textContent = '저장 중...';
+  clearTimeout(inviteSaveTimer);
+  inviteSaveTimer = setTimeout(saveCurDraft, 600);
+}
+async function setActiveDraft(id){
+  inviteActiveId = id;
+  try{ await setDoc(invitationRef, { activeId:id }, {merge:true}); inviteActiveSaved = true; }
+  catch(e){ console.error(e); }
+  renderInviteAll();
+}
+async function saveInvitationPhoto(photo){
+  try{ await setDoc(doc(db, 'invitationPhotos', photo.id), photo); }
+  catch(e){ console.error('invitation photo save failed', e); }
+}
+async function deleteInvitationPhoto(id){
+  try{ await deleteDoc(doc(db, 'invitationPhotos', id)); }
+  catch(e){ console.error('invitation photo delete failed', e); }
+}
+
+/* ---- 탭 ---- */
+function renderInviteTabs(){
+  const bar = $('#inviteTabBar');
+  bar.innerHTML = '';
+  const list = sortedDrafts();
+  list.forEach(d => {
+    const tab = document.createElement('div');
+    tab.className = 'mb-tab' + (d.id === inviteCurId ? ' active' : '');
+    if(inviteEditingId === d.id){
+      const input = document.createElement('input');
+      input.className = 'mb-tab-name-input';
+      input.value = d.name;
+      tab.appendChild(input);
+      const commit = () => {
+        const v = input.value.trim();
+        inviteEditingId = null;
+        if(v && v !== d.name){ d.name = v; saveDraftNow(d); }
+        renderInviteTabs();
+      };
+      input.addEventListener('keydown', ev => {
+        if(ev.key === 'Enter') commit();
+        if(ev.key === 'Escape'){ inviteEditingId = null; renderInviteTabs(); }
+      });
+      input.addEventListener('blur', commit);
+      input.addEventListener('click', ev => ev.stopPropagation());
+      setTimeout(() => { input.focus(); input.select(); }, 0);
+    }else{
+      const label = document.createElement('span');
+      label.textContent = (d.id === inviteActiveId ? '★ ' : '') + d.name;
+      label.addEventListener('dblclick', ev => { ev.stopPropagation(); inviteEditingId = d.id; renderInviteTabs(); });
+      tab.appendChild(label);
+    }
+    if(list.length > 1){
+      const x = document.createElement('span');
+      x.className = 'mb-tab-x';
+      x.textContent = '✕';
+      x.title = '시안 삭제';
+      x.addEventListener('click', ev => {
+        ev.stopPropagation();
+        if(confirm(`'${d.name}' 시안을 삭제할까요? 시안의 사진도 함께 삭제돼요.`)) deleteDraft(d.id);
+      });
+      tab.appendChild(x);
+    }
+    tab.addEventListener('click', () => {
+      if(inviteEditingId === d.id || inviteCurId === d.id) return;
+      clearTimeout(inviteSaveTimer);
+      if(inviteSaveTimer){ saveCurDraft(); }
+      inviteCurId = d.id;
+      renderInviteAll(true);
+    });
+    bar.appendChild(tab);
+  });
+  const add = document.createElement('div');
+  add.className = 'mb-tab mb-tab-add';
+  add.textContent = '+';
+  add.title = '시안 추가';
+  add.addEventListener('click', async () => {
+    const maxOrder = list.reduce((m,d)=> Math.max(m, d.order||0), -1);
+    const nd = newDraft('시안 ' + (list.length+1), maxOrder+1);
+    const cur = curDraft();
+    if(cur){ nd.groomName = cur.groomName; nd.brideName = cur.brideName; nd.weddingDateTime = cur.weddingDateTime; nd.venueName = cur.venueName; nd.venueAddress = cur.venueAddress; nd.mapQuery = cur.mapQuery; }
+    inviteDrafts[nd.id] = nd;
+    inviteCurId = nd.id;
+    renderInviteAll(true);
+    await saveDraftNow(nd);
+  });
+  bar.appendChild(add);
+}
+
+async function deleteDraft(id){
+  const photos = draftPhotos(id);
+  delete inviteDrafts[id];
+  if(inviteCurId === id) inviteCurId = sortedDrafts()[0].id;
+  if(inviteActiveId === id) inviteActiveId = sortedDrafts()[0].id;
+  renderInviteAll(true);
+  try{
+    await updateDoc(invitationRef, { ['drafts.'+id]: deleteField(), activeId: inviteActiveId });
+    await Promise.all(photos.map(p => deleteDoc(doc(db, 'invitationPhotos', p.id))));
+  }catch(e){ console.error('draft delete failed', e); }
+}
+async function duplicateDraft(){
+  const src = curDraft(); if(!src) return;
+  const list = sortedDrafts();
+  const nd = JSON.parse(JSON.stringify(src));
+  nd.id = uid();
+  nd.name = src.name + ' 복사';
+  nd.order = list.reduce((m,d)=> Math.max(m, d.order||0), -1) + 1;
+  nd.blocks = (src.blocks || []).map(b => Object.assign({}, b, {id:uid()}));
+  inviteDrafts[nd.id] = nd;
+  inviteCurId = nd.id;
+  const photos = draftPhotos(src.id).map(p => Object.assign({}, p, {id:uid(), inviteId:nd.id}));
+  invitationPhotos = invitationPhotos.concat(photos);
+  renderInviteAll(true);
+  await saveDraftNow(nd);
+  await Promise.all(photos.map(saveInvitationPhoto));
+}
+
+/* ---- 폼 / 액션 ---- */
+function renderInviteForm(force){
+  const d = curDraft(); if(!d) return;
+  const setVal = (id, val) => { const el = $('#'+id); if(el && (force || document.activeElement !== el)) el.value = val || ''; };
+  setVal('inviteGroomName', d.groomName);
+  setVal('inviteBrideName', d.brideName);
+  setVal('inviteDateTime', d.weddingDateTime);
+  setVal('inviteVenueName', d.venueName);
+  setVal('inviteVenueAddress', d.venueAddress);
+  setVal('inviteMapQuery', d.mapQuery);
+  $('#inviteMapTestLink').href = naverMapUrl(d);
+  const isActive = d.id === inviteActiveId;
+  const badge = $('#inviteActiveBadge');
+  badge.textContent = isActive ? '★ 대표 시안 (기본 링크에 표시 중)' : '대표 시안 아님';
+  badge.classList.toggle('on', isActive);
+  $('#inviteSetActiveBtn').disabled = isActive;
+  $('#invitePreviewLink').href = inviteLinkFor(d.id);
+}
+function inviteLinkFor(id){
+  return new URL('invite.html', location.href).href.split('?')[0] + '?d=' + encodeURIComponent(id);
+}
+
+/* ---- 블록 에디터 ---- */
+function inviteBlockSig(d){ return (d.blocks||[]).map(b => b.id+':'+b.type).join('|'); }
+function renderInviteBlocks(force){
+  const box = $('#inviteBlocks');
+  const d = curDraft(); if(!d) return;
+  if(!force && box.contains(document.activeElement)) return;
+  box.innerHTML = '';
+  const blocks = d.blocks || (d.blocks = []);
+  blocks.forEach((b, idx) => {
+    const card = document.createElement('div');
+    card.className = 'invite-block';
+    const head = document.createElement('div');
+    head.className = 'invite-block-head';
+    const title = document.createElement('span');
+    title.textContent = (idx+1) + '. ' + (BLOCK_LABELS[b.type] || b.type);
+    head.appendChild(title);
+    const sp = document.createElement('span'); sp.className = 'spacer'; head.appendChild(sp);
+    const mk = (txt, tip, fn, dis, cls) => {
+      const bt = document.createElement('button');
+      bt.textContent = txt; bt.title = tip; bt.disabled = !!dis;
+      if(cls) bt.className = cls;
+      bt.addEventListener('click', fn);
+      head.appendChild(bt);
+    };
+    mk('▲', '위로', () => moveBlock(idx, -1), idx === 0);
+    mk('▼', '아래로', () => moveBlock(idx, 1), idx === blocks.length-1);
+    mk('✕', '블록 삭제', () => deleteBlock(idx), false, 'del');
+    card.appendChild(head);
+
+    if(b.type === 'text'){
+      const ta = document.createElement('textarea');
+      ta.rows = 4; ta.value = b.text || '';
+      ta.addEventListener('input', () => { b.text = ta.value; scheduleInviteSave(); });
+      card.appendChild(ta);
+    }else if(TEXT_BLOCKS.includes(b.type)){
+      const inp = document.createElement('input');
+      inp.type = 'text'; inp.value = b.text || '';
+      inp.addEventListener('input', () => { b.text = inp.value; scheduleInviteSave(); });
+      card.appendChild(inp);
+    }else{
+      const note = document.createElement('div');
+      note.className = 'note';
+      note.textContent = {
+        photos:'아래 「사진」에 등록한 사진이 슬라이드로 표시돼요.',
+        names:'기본 정보의 신랑·신부 이름이 표시돼요.',
+        datetime:'기본 정보의 예식 일시가 표시돼요.',
+        venue:'장소명·주소와 「네이버지도로 보기」 버튼이 표시돼요.',
+        divider:'얇은 구분선이 표시돼요.'
+      }[b.type] || '';
+      card.appendChild(note);
+    }
+    box.appendChild(card);
+  });
+}
+function moveBlock(i, dir){
+  const d = curDraft(); const j = i + dir;
+  if(!d || j < 0 || j >= d.blocks.length) return;
+  const t = d.blocks[i]; d.blocks[i] = d.blocks[j]; d.blocks[j] = t;
+  renderInviteBlocks(true);
+  scheduleInviteSave();
+}
+function deleteBlock(i){
+  const d = curDraft(); if(!d) return;
+  d.blocks.splice(i, 1);
+  renderInviteBlocks(true);
+  scheduleInviteSave();
+}
+function addBlock(){
+  const d = curDraft(); if(!d) return;
+  const type = $('#inviteBlockType').value;
+  const b = {id:uid(), type:type};
+  if(TEXT_BLOCKS.includes(type)) b.text = '';
+  d.blocks.push(b);
+  renderInviteBlocks(true);
+  scheduleInviteSave();
+  const inputs = $('#inviteBlocks').querySelectorAll('input,textarea');
+  if(TEXT_BLOCKS.includes(type) && inputs.length) inputs[inputs.length-1].focus();
+}
+
+/* ---- 사진 ---- */
+function renderInvitationPhotos(){
+  updateMtPhotoSel();
+  const strip = $('#invitePhotoStrip');
+  strip.innerHTML = '';
+  const list = draftPhotos(inviteCurId);
+  list.forEach((p, idx) => {
+    const card = document.createElement('div');
+    card.className = 'invite-photo-card';
+    const img = document.createElement('img');
+    img.src = p.image;
+    card.appendChild(img);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'mb-remove';
+    removeBtn.title = '삭제';
+    removeBtn.textContent = '✕';
+    removeBtn.addEventListener('click', () => deleteInvitationPhoto(p.id));
+    card.appendChild(removeBtn);
+
+    const orderBtns = document.createElement('div');
+    orderBtns.className = 'invite-photo-order-btns';
+    const leftBtn = document.createElement('button');
+    leftBtn.textContent = '◀';
+    leftBtn.disabled = idx === 0;
+    leftBtn.addEventListener('click', () => swapInvitationPhotoOrder(list, idx, idx-1));
+    const rightBtn = document.createElement('button');
+    rightBtn.textContent = '▶';
+    rightBtn.disabled = idx === list.length-1;
+    rightBtn.addEventListener('click', () => swapInvitationPhotoOrder(list, idx, idx+1));
+    orderBtns.appendChild(leftBtn);
+    orderBtns.appendChild(rightBtn);
+    card.appendChild(orderBtns);
+    strip.appendChild(card);
+  });
+}
+function swapInvitationPhotoOrder(list, i, j){
+  if(j < 0 || j >= list.length) return;
+  const a = list[i], b = list[j];
+  const tmp = a.order; a.order = b.order; b.order = tmp;
+  saveInvitationPhoto(a);
+  saveInvitationPhoto(b);
+}
+async function addInvitationPhotoFile(file){
+  if(!file || file.type.indexOf('image') !== 0) return;
+  const targetId = inviteCurId;
+  const res = await compressImage(file);
+  const maxOrder = draftPhotos(targetId).reduce((m,p)=> Math.max(m, p.order||0), -1);
+  const photo = { id: uid(), inviteId: targetId, order: maxOrder+1, image: res.url, kb: res.kb };
+  invitationPhotos.push(photo);
+  renderInvitationPhotos();
+  await saveInvitationPhoto(photo);
+}
+
+/* ============ 링크 미리보기(메타태그) 편집 → GitHub 저장 ============ */
+const MT_TOKEN_KEY = 'metaEditorToken';
+const MT_OG_RE = /<!-- OG-START -->[\s\S]*?<!-- OG-END -->/;
+let mtNewImage = null;
+function mtLsGet(){ try{ return localStorage.getItem(MT_TOKEN_KEY) || ''; }catch(e){ return ''; } }
+function mtLsSet(v){ try{ if(v) localStorage.setItem(MT_TOKEN_KEY, v); else localStorage.removeItem(MT_TOKEN_KEY); }catch(e){} }
+function mtStatus(msg, cls){ const el = $('#mtStatus'); el.textContent = msg; el.className = 'mt-status ' + (cls || ''); }
+function mtRepo(){
+  const parts = $('#mtRepo').value.trim().split('/');
+  return { owner: parts[0], name: parts[1], branch: $('#mtBranch').value.trim() || 'main', path: $('#mtPath').value.trim() };
+}
+// Vite 프로젝트에서는 public/ 폴더 안의 파일이 사이트 루트로 배포되므로 주소에서 public/ 을 뺍니다.
+function mtDefaultPageUrl(){ const r = mtRepo(); return `https://${r.owner}.github.io/${r.name}/${r.path.replace(/^public\//, '')}`; }
+function mtApi(url, opt){
+  opt = opt || {};
+  opt.headers = Object.assign({
+    'Authorization': 'Bearer ' + $('#mtToken').value.trim(),
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28'
+  }, opt.headers || {});
+  return fetch(url, opt);
+}
+async function mtExplain(res){
+  let m = ''; try{ m = (await res.json()).message || ''; }catch(e){}
+  const hint = res.status === 401 ? '토큰이 올바르지 않아요.'
+    : res.status === 403 ? '토큰 권한이 부족해요. Contents: Read and write 인지 확인해주세요.'
+    : res.status === 404 ? '저장소/브랜치/파일을 찾지 못했어요. 토큰이 이 저장소를 포함하는지도 확인해주세요.'
+    : (res.status === 409 || res.status === 422) ? '다른 변경과 충돌했어요. 다시 불러온 뒤 저장해주세요.' : '';
+  return `GitHub 오류 ${res.status}: ${m}${hint ? '\n' + hint : ''}`;
+}
+function mtB64ToUtf8(b64){
+  const bin = atob(b64.replace(/\n/g, ''));
+  return new TextDecoder('utf-8').decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+}
+function mtUtf8ToB64(str){
+  const bytes = new TextEncoder().encode(str);
+  let bin = ''; bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin);
+}
+function mtEsc(v){ return String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function mtBuildBlock(m){
+  const L = [
+    '<!-- OG-START -->',
+    `<title>${mtEsc(m.title)}</title>`,
+    `<meta name="description" content="${mtEsc(m.desc)}">`,
+    '<meta property="og:type" content="website">',
+    `<meta property="og:title" content="${mtEsc(m.title)}">`,
+    `<meta property="og:description" content="${mtEsc(m.desc)}">`
+  ];
+  if(m.url) L.push(`<meta property="og:url" content="${mtEsc(m.url)}">`);
+  if(m.img){
+    L.push(`<meta property="og:image" content="${mtEsc(m.img)}">`,
+      '<meta property="og:image:width" content="1200">',
+      '<meta property="og:image:height" content="630">',
+      '<meta name="twitter:card" content="summary_large_image">',
+      `<meta name="twitter:image" content="${mtEsc(m.img)}">`);
+  }
+  L.push('<!-- OG-END -->');
+  return L.join('\n');
+}
+function mtParseBlock(html){
+  const mm = html.match(MT_OG_RE);
+  if(!mm) return null;
+  const dom = new DOMParser().parseFromString('<!DOCTYPE html><html><head>' + mm[0] + '</head><body></body></html>', 'text/html');
+  const g = k => { const e = dom.head.querySelector(`meta[property="${k}"]`); return e ? e.getAttribute('content') : ''; };
+  return { title: g('og:title') || dom.title || '', desc: g('og:description'), img: g('og:image'), url: g('og:url') };
+}
+function mtRenderPreview(){
+  $('#mtPvTitle').textContent = $('#mtTitle').value || '(제목 없음)';
+  $('#mtPvDesc').textContent = $('#mtDesc').value;
+  $('#mtPvUrl').textContent = ($('#mtPageUrl').value || '').replace(/^https?:\/\//, '').split('/')[0];
+  const el = $('#mtPvImg');
+  const src = mtNewImage ? mtNewImage.preview : $('#mtImgUrl').value.trim();
+  if(src){ el.style.backgroundImage = `url("${src}")`; el.textContent = ''; }
+  else{ el.style.backgroundImage = ''; el.textContent = '이미지 없음'; }
+}
+function updateMtPhotoSel(){
+  const sel = $('#mtPhotoSel'); if(!sel) return;
+  const prev = sel.value;
+  const list = draftPhotos(inviteCurId);
+  sel.innerHTML = '';
+  if(!list.length){ const o = document.createElement('option'); o.value = ''; o.textContent = '등록된 사진 없음'; sel.appendChild(o); return; }
+  list.forEach((p, i) => { const o = document.createElement('option'); o.value = p.id; o.textContent = '사진 ' + (i+1); sel.appendChild(o); });
+  if(prev && list.some(p => p.id === prev)) sel.value = prev;
+}
+// 이미지(src: dataURL/objectURL) → 1200x630 JPEG(약 300KB 이하)
+function mtMakeThumb(src){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const W = 1200, H = 630;
+      const c = document.createElement('canvas'); c.width = W; c.height = H;
+      const g = c.getContext('2d');
+      g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+      const sc = Math.max(W / img.width, H / img.height);
+      const w = img.width * sc, h = img.height * sc;
+      g.drawImage(img, (W - w) / 2, (H - h) * 0.35, w, h);
+      let q = 0.88;
+      const tryOnce = () => c.toBlob(b => {
+        if(!b) return reject(new Error('변환 실패'));
+        if(b.size > 300 * 1024 && q > 0.4){ q -= 0.08; tryOnce(); } else resolve(b);
+      }, 'image/jpeg', q);
+      tryOnce();
+    };
+    img.onerror = () => reject(new Error('이미지를 불러오지 못했어요.'));
+    img.src = src;
+  });
+}
+function mtBlobToB64(blob){
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(String(fr.result).split(',')[1]);
+    fr.onerror = reject;
+    fr.readAsDataURL(blob);
+  });
+}
+async function mtSetImage(src){
+  try{
+    const blob = await mtMakeThumb(src);
+    const preview = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); });
+    mtNewImage = { blob, preview };
+    $('#mtImgInfo').textContent = `1200×630 · ${Math.round(blob.size/1024)}KB`;
+    mtRenderPreview();
+  }catch(e){ mtStatus(e.message, 'err'); }
+}
+function mtStampName(){
+  const d = new Date(), p = n => String(n).padStart(2, '0');
+  return `og-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}${p(d.getHours())}${p(d.getMinutes())}.jpg`;
+}
+function mtPathUrl(base){ return base.split('/').map(encodeURIComponent).join('/'); }
+
+async function mtLoad(){
+  const r = mtRepo();
+  if(!r.owner || !r.name){ mtStatus('저장소를 owner/name 형식으로 입력해주세요.', 'err'); return; }
+  if(!$('#mtToken').value.trim()){ $('#mtConn').open = true; mtStatus('GitHub 연결 설정에서 토큰을 입력해주세요.', 'err'); return; }
+  mtStatus('불러오는 중...');
+  try{
+    const res = await mtApi(`https://api.github.com/repos/${r.owner}/${r.name}/contents/${mtPathUrl(r.path)}?ref=${encodeURIComponent(r.branch)}`);
+    if(!res.ok){ mtStatus(await mtExplain(res), 'err'); return; }
+    const j = await res.json();
+    const cur = mtParseBlock(mtB64ToUtf8(j.content));
+    if(!cur){ mtStatus(`${r.path} 에서 OG-START ~ OG-END 구간을 찾지 못했어요.\n최신 invite.html 을 먼저 올려주세요.`, 'err'); return; }
+    $('#mtTitle').value = cur.title; $('#mtDesc').value = cur.desc;
+    $('#mtImgUrl').value = cur.img; $('#mtPageUrl').value = cur.url || mtDefaultPageUrl();
+    mtLsSet($('#mtRemember').checked ? $('#mtToken').value.trim() : '');
+    mtRenderPreview();
+    mtStatus('현재 값을 불러왔어요.', 'ok');
+  }catch(e){ mtStatus('불러오기 실패: ' + e.message, 'err'); }
+}
+async function mtSave(){
+  const r = mtRepo();
+  if(!r.owner || !r.name || !$('#mtToken').value.trim()){ $('#mtConn').open = true; mtStatus('GitHub 연결 설정에서 저장소와 토큰을 입력해주세요.', 'err'); return; }
+  const title = $('#mtTitle').value.trim(), desc = $('#mtDesc').value.trim();
+  if(!title){ mtStatus('제목을 입력해주세요.', 'err'); return; }
+  $('#mtSaveBtn').disabled = true;
+  mtStatus('저장 중...');
+  try{
+    const base = `https://api.github.com/repos/${r.owner}/${r.name}/contents/`;
+    let imgUrl = $('#mtImgUrl').value.trim();
+    if(mtNewImage){
+      const dir = r.path.includes('/') ? r.path.replace(/[^/]*$/, '') : '';
+      const fname = $('#mtStamp').checked ? mtStampName() : 'og.jpg';
+      const target = dir + fname;
+      let sha;
+      if(!$('#mtStamp').checked){
+        const ex = await mtApi(base + mtPathUrl(target) + '?ref=' + encodeURIComponent(r.branch));
+        if(ex.ok) sha = (await ex.json()).sha;
+      }
+      const put = await mtApi(base + mtPathUrl(target), {
+        method:'PUT',
+        body: JSON.stringify({ message: `image: 링크 미리보기 이미지 업로드 (${fname})`, content: await mtBlobToB64(mtNewImage.blob), branch: r.branch, sha })
+      });
+      if(!put.ok){ mtStatus('이미지 업로드 실패\n' + await mtExplain(put), 'err'); return; }
+      imgUrl = new URL(fname, ($('#mtPageUrl').value.trim() || mtDefaultPageUrl())).href;
+    }
+    const res = await mtApi(base + mtPathUrl(r.path) + '?ref=' + encodeURIComponent(r.branch));
+    if(!res.ok){ mtStatus(await mtExplain(res), 'err'); return; }
+    const j = await res.json();
+    const html = mtB64ToUtf8(j.content);
+    if(!MT_OG_RE.test(html)){ mtStatus('OG-START ~ OG-END 구간이 없어요. 최신 invite.html 을 먼저 올려주세요.', 'err'); return; }
+    const out = html.replace(MT_OG_RE, () => mtBuildBlock({ title, desc, img: imgUrl, url: $('#mtPageUrl').value.trim() }));
+    if(out === html && !mtNewImage){ mtStatus('변경된 내용이 없어요.', 'ok'); return; }
+    const put = await mtApi(base + mtPathUrl(r.path), {
+      method:'PUT',
+      body: JSON.stringify({ message: 'feat: 링크 미리보기 메타태그 수정', content: mtUtf8ToB64(out), branch: r.branch, sha: j.sha })
+    });
+    if(!put.ok){ mtStatus(await mtExplain(put), 'err'); return; }
+    mtLsSet($('#mtRemember').checked ? $('#mtToken').value.trim() : '');
+    $('#mtImgUrl').value = imgUrl; mtNewImage = null; $('#mtImgInfo').textContent = '';
+    mtRenderPreview();
+    mtStatus('저장했어요. 1~2분 뒤 반영돼요. (카카오톡은 공유 디버거에서 캐시 초기화)', 'ok');
+  }catch(e){ mtStatus('저장 실패: ' + e.message, 'err'); }
+  finally{ $('#mtSaveBtn').disabled = false; }
+}
+function bindMetaEditor(){
+  $('#mtToken').value = mtLsGet(); $('#mtRemember').checked = !!mtLsGet();
+  $('#mtPageUrl').value = mtDefaultPageUrl();
+  ['mtTitle','mtDesc','mtImgUrl','mtPageUrl'].forEach(id => $('#'+id).addEventListener('input', mtRenderPreview));
+  $('#mtPhotoBtn').addEventListener('click', () => {
+    const p = draftPhotos(inviteCurId).find(x => x.id === $('#mtPhotoSel').value);
+    if(!p){ mtStatus('이 시안에 등록된 사진이 없어요. 「내 이미지 파일」을 쓰거나 아래에 사진을 먼저 추가해주세요.', 'err'); return; }
+    mtSetImage(p.image);
+  });
+  $('#mtUploadBtn').addEventListener('click', () => $('#mtFile').click());
+  $('#mtFile').addEventListener('change', ev => {
+    const f = ev.target.files[0]; ev.target.value = '';
+    if(!f) return;
+    const fr = new FileReader();
+    fr.onload = () => mtSetImage(fr.result);
+    fr.readAsDataURL(f);
+  });
+  $('#mtLoadBtn').addEventListener('click', mtLoad);
+  $('#mtSaveBtn').addEventListener('click', mtSave);
+  mtRenderPreview();
+}
+
+function renderInviteAll(force){
+  if(!curDraft()) return;
+  renderInviteTabs();
+  renderInviteForm(force);
+  renderInviteBlocks(force);
+  renderInvitationPhotos();
+}
+
+function bindInvitationTab(){
+  const fieldMap = {
+    inviteGroomName:'groomName', inviteBrideName:'brideName', inviteDateTime:'weddingDateTime',
+    inviteVenueName:'venueName', inviteVenueAddress:'venueAddress', inviteMapQuery:'mapQuery'
+  };
+  Object.keys(fieldMap).forEach(id => {
+    $('#'+id).addEventListener('input', ev => {
+      const d = curDraft(); if(!d) return;
+      d[fieldMap[id]] = ev.target.value;
+      $('#inviteMapTestLink').href = naverMapUrl(d);
+      scheduleInviteSave();
+    });
+  });
+  $('#inviteAddBlockBtn').addEventListener('click', addBlock);
+  $('#inviteSetActiveBtn').addEventListener('click', () => { const d = curDraft(); if(d) setActiveDraft(d.id); });
+  $('#inviteDuplicateBtn').addEventListener('click', duplicateDraft);
+  $('#inviteCopyLinkBtn').addEventListener('click', async () => {
+    const d = curDraft(); if(!d) return;
+    const url = inviteLinkFor(d.id);
+    const btn = $('#inviteCopyLinkBtn');
+    try{ await navigator.clipboard.writeText(url); btn.textContent = '복사됨 ✓'; }
+    catch(e){ prompt('링크를 복사하세요', url); }
+    setTimeout(() => { btn.textContent = '링크 복사'; }, 1500);
+  });
+
+  const dropzone = $('#inviteDropzone');
+  const fileInput = $('#inviteFileInput');
+  dropzone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => {
+    Array.from(fileInput.files).forEach(addInvitationPhotoFile);
+    fileInput.value = '';
+  });
+  dropzone.addEventListener('dragover', ev => { ev.preventDefault(); dropzone.classList.add('dragover'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+  dropzone.addEventListener('drop', ev => {
+    ev.preventDefault();
+    dropzone.classList.remove('dragover');
+    Array.from(ev.dataTransfer.files || []).forEach(addInvitationPhotoFile);
+  });
+  document.addEventListener('paste', ev => {
+    const panel = $('#panel-invitation');
+    if(!panel || !panel.classList.contains('active')) return;
+    const items = ev.clipboardData && ev.clipboardData.items;
+    if(!items) return;
+    for(let i=0;i<items.length;i++){
+      if(items[i].type.indexOf('image') === 0){
+        addInvitationPhotoFile(items[i].getAsFile());
+        ev.preventDefault();
+        break;
+      }
+    }
+  });
+}
+
+/* ============ 하객 관리 ============ */
+const GUEST_SIDES = ['신랑측','신부측'];
+const GUEST_RELATIONS = ['가족','친척','친구','직장','지인','기타'];
+const GUEST_INVITES = ['미전달','모바일','실물'];
+const GUEST_ATTENDS = ['미정','참석','불참'];
+const GUEST_NUM_FIELDS = ['people','tickets','gift'];
+
+function guestOptionsHtml(list, withBlank){
+  return (withBlank ? '<option value="">-</option>' : '') + list.map(v => `<option value="${v}">${v}</option>`).join('');
+}
+function normalizeGuest(g){
+  const d = {side:'', relation:'', name:'', phone:'', people:1, invite:'미전달', attend:'미정', tickets:0, gift:0, giftReturned:false, memo:'', order:0};
+  Object.keys(d).forEach(k => { if(g[k] === undefined || g[k] === null) g[k] = d[k]; });
+  return g;
+}
+function newGuestData(order, side){
+  return normalizeGuest({ id: uid(), order, side: side || '' });
+}
+async function saveGuest(g){
+  try{ await setDoc(doc(db, 'guests', g.id), g); }
+  catch(e){ console.error('guest save failed', e); }
+}
+async function deleteGuestDoc(id){
+  try{ await deleteDoc(doc(db, 'guests', id)); }
+  catch(e){ console.error('guest delete failed', e); }
+}
+
+function buildGuestRow(g){
+  const tr = document.createElement('tr');
+  tr.dataset.id = g.id;
+  tr.innerHTML = `
+    <td class="g-num"></td>
+    <td><select class="cell-input" data-f="side">${guestOptionsHtml(GUEST_SIDES, true)}</select></td>
+    <td><select class="cell-input" data-f="relation">${guestOptionsHtml(GUEST_RELATIONS, true)}</select></td>
+    <td><input type="text" class="cell-input" data-f="name" placeholder="이름"></td>
+    <td><input type="text" class="cell-input" data-f="phone" inputmode="tel" placeholder="010-0000-0000"></td>
+    <td class="num"><input type="number" min="0" class="cell-input" data-f="people" placeholder="1" style="min-width:56px;"></td>
+    <td><select class="cell-input" data-f="invite">${guestOptionsHtml(GUEST_INVITES, false)}</select></td>
+    <td><select class="cell-input" data-f="attend">${guestOptionsHtml(GUEST_ATTENDS, false)}</select></td>
+    <td class="num"><input type="number" min="0" class="cell-input" data-f="tickets" placeholder="0" style="min-width:56px;"></td>
+    <td class="num"><input type="number" min="0" step="10000" class="cell-input" data-f="gift" placeholder="0" style="min-width:96px;"></td>
+    <td class="g-check"><input type="checkbox" class="item-check" data-f="giftReturned" title="답례품 전달 완료"></td>
+    <td><input type="text" class="cell-input" data-f="memo" placeholder="메모"></td>
+    <td class="g-del"><button class="del-icon-btn" title="행 삭제">✕</button></td>
+  `;
+  return tr;
+}
+function updateGuestRowClass(tr, g){
+  tr.classList.toggle('g-attend-yes', g.attend === '참석');
+  tr.classList.toggle('g-attend-no', g.attend === '불참');
+}
+// 사용자가 지금 입력 중인 칸은 건드리지 않고 나머지만 갱신 (타이핑 중 포커스를 뺏지 않기 위해)
+function fillGuestRow(tr, g){
+  tr.querySelectorAll('[data-f]').forEach(el => {
+    if(el === document.activeElement) return;
+    const f = el.dataset.f;
+    if(el.type === 'checkbox') el.checked = !!g[f];
+    else if(GUEST_NUM_FIELDS.includes(f)) el.value = g[f] ? g[f] : '';
+    else el.value = g[f] || '';
+  });
+  updateGuestRowClass(tr, g);
+}
+function insertGuestRow(g){
+  const tbody = $('#guestTableBody');
+  const tr = buildGuestRow(g);
+  fillGuestRow(tr, g);
+  const idx = guests.findIndex(x => x.id === g.id);
+  let nextRow = null;
+  for(let j = idx + 1; j < guests.length; j++){
+    const el = guestRowEls.get(guests[j].id);
+    if(el){ nextRow = el; break; }
+  }
+  tbody.insertBefore(tr, nextRow);
+  guestRowEls.set(g.id, tr);
+}
+
+function guestMatchesFilter(g){
+  const side = $('#guestFilterSide').value;
+  const attend = $('#guestFilterAttend').value;
+  const invite = $('#guestFilterInvite').value;
+  const q = $('#guestSearch').value.trim().toLowerCase();
+  if(side && g.side !== side) return false;
+  if(attend && g.attend !== attend) return false;
+  if(invite && g.invite !== invite) return false;
+  if(q){
+    const hay = [g.name, g.phone, g.memo, g.relation].join(' ').toLowerCase();
+    if(!hay.includes(q)) return false;
+  }
+  return true;
+}
+function applyGuestFilters(){
+  let visible = 0;
+  guests.forEach(g => {
+    const tr = guestRowEls.get(g.id);
+    if(!tr) return;
+    const show = guestMatchesFilter(g);
+    tr.style.display = show ? '' : 'none';
+    if(show) visible++;
+  });
+  const el = $('#guestCountState');
+  if(el) el.textContent = guests.length ? `표시 ${visible}행 / 전체 ${guests.length}행` : '';
+}
+function renumberGuestRows(){
+  guests.forEach((g, i) => {
+    const tr = guestRowEls.get(g.id);
+    if(tr) tr.firstElementChild.textContent = i + 1;
+  });
+}
+function renderGuestSummary(){
+  const people = g => Number(g.people) || 0;
+  const sum = (list, fn) => list.reduce((s, g) => s + fn(g), 0);
+  const total = sum(guests, people);
+  const groom = sum(guests.filter(g => g.side === '신랑측'), people);
+  const bride = sum(guests.filter(g => g.side === '신부측'), people);
+  const attend = sum(guests.filter(g => g.attend === '참석'), people);
+  const absent = sum(guests.filter(g => g.attend === '불참'), people);
+  const undecided = sum(guests.filter(g => g.attend === '미정'), people);
+  const notInvited = guests.filter(g => g.invite === '미전달').length;
+  const tickets = sum(guests, g => Number(g.tickets) || 0);
+  const gift = sum(guests, g => Number(g.gift) || 0);
+  const attendRows = guests.filter(g => g.attend === '참석');
+  const returned = attendRows.filter(g => g.giftReturned).length;
+
+  const cell = (label, value, sub, cls) => `
+    <div class="summary-cell ${cls || ''}"><div class="label">${label}</div><div class="value">${value}</div>${sub ? `<div class="sub">${sub}</div>` : ''}</div>`;
+  $('#guestSummary').innerHTML =
+    cell('전체 인원', `${total}명`, `${guests.length}건`) +
+    cell('신랑측', `${groom}명`) +
+    cell('신부측', `${bride}명`) +
+    cell('참석', `${attend}명`, `불참 ${absent} · 미정 ${undecided}`, 'accent') +
+    cell('청첩장 미전달', `${notInvited}건`, '', notInvited ? 'warn' : '') +
+    cell('식권', `${tickets}장`) +
+    cell('축의금 합계', fmtWon(gift), '', 'accent') +
+    cell('답례품 전달', `${returned}/${attendRows.length}`, '참석자 기준');
+}
+function afterGuestsChanged(){
+  renumberGuestRows();
+  applyGuestFilters();
+  renderGuestSummary();
+  const hasAny = guests.length > 0;
+  $('#guestTable').style.display = hasAny ? '' : 'none';
+  $('#guestEmptyNote').style.display = hasAny ? 'none' : 'block';
+  if(guestPendingFocusId){
+    const tr = guestRowEls.get(guestPendingFocusId);
+    if(tr){
+      guestPendingFocusId = null;
+      const input = tr.querySelector('[data-f="name"]');
+      if(input){ input.focus(); input.scrollIntoView({block:'nearest'}); }
+    }
+  }
+}
+function resetGuestView(){
+  guests = [];
+  guestRowEls.clear();
+  guestPendingFocusId = null;
+  const tbody = $('#guestTableBody');
+  if(tbody) tbody.innerHTML = '';
+  const summary = $('#guestSummary');
+  if(summary) summary.innerHTML = '';
+}
+
+// afterId 바로 아래 칸에 끼워 넣을 order 값 (두 행 사이 중간값)
+function guestOrderAfter(afterId){
+  if(!guests.length) return 1;
+  const idx = afterId ? guests.findIndex(x => x.id === afterId) : -1;
+  if(idx >= 0){
+    const cur = guests[idx], next = guests[idx + 1];
+    return next ? (cur.order + next.order) / 2 : cur.order + 1;
+  }
+  return guests[guests.length - 1].order + 1;
+}
+function clearHidingGuestFilters(){
+  // 검색·참석·청첩장 필터가 켜져 있으면 새 행이 바로 숨겨지므로 해제 (구분 필터는 새 행의 기본값으로 사용)
+  $('#guestSearch').value = '';
+  $('#guestFilterAttend').value = '';
+  $('#guestFilterInvite').value = '';
+  applyGuestFilters();
+}
+function addGuestRow(afterId){
+  clearHidingGuestFilters();
+  const g = newGuestData(guestOrderAfter(afterId), $('#guestFilterSide').value);
+  guestPendingFocusId = g.id;
+  saveGuest(g);
+}
+function addGuestRows(n){
+  clearHidingGuestFilters();
+  const side = $('#guestFilterSide').value;
+  let order = guests.length ? guests[guests.length - 1].order : 0;
+  const created = [];
+  for(let i = 0; i < n; i++){ order += 1; created.push(newGuestData(order, side)); }
+  guestPendingFocusId = created[0].id;
+  created.forEach(saveGuest);
+}
+
+function csvCell(v){
+  let s = (v === null || v === undefined) ? '' : String(v);
+  if(/^[=+\-@\t\r]/.test(s)) s = "'" + s;   // 엑셀 수식으로 해석되는 것을 방지
+  return '"' + s.replace(/"/g, '""') + '"';
+}
+function exportGuestsCsv(){
+  const header = ['구분','관계','이름','연락처','인원','청첩장','참석','식권','축의금','답례품 전달','메모'];
+  const rows = guests.map(g => [g.side, g.relation, g.name, g.phone, g.people, g.invite, g.attend, g.tickets, g.gift, g.giftReturned ? 'O' : '', g.memo]);
+  const csv = [header, ...rows].map(r => r.map(csvCell).join(',')).join('\r\n');
+  const blob = new Blob(['﻿' + csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `하객명단_${todayStr()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function bindGuestTab(){
+  const body = $('#guestTableBody');
+
+  body.addEventListener('change', ev => {
+    const el = ev.target;
+    const f = el.dataset && el.dataset.f;
+    if(!f) return;
+    const tr = el.closest('tr');
+    const g = guests.find(x => x.id === tr.dataset.id);
+    if(!g) return;
+    if(el.type === 'checkbox') g[f] = el.checked;
+    else if(GUEST_NUM_FIELDS.includes(f)){
+      const n = parseFloat(el.value);
+      g[f] = (isNaN(n) || n < 0) ? 0 : n;
+    }else g[f] = el.value;
+    updateGuestRowClass(tr, g);
+    renderGuestSummary();
+    if(el.tagName === 'SELECT') applyGuestFilters();
+    saveGuest(g);
+  });
+
+  // 숫자 칸에 들어가면 전체 선택 → 바로 타이핑해도 앞에 0이 남지 않음
+  body.addEventListener('focusin', ev => {
+    if(ev.target.type === 'number') ev.target.select();
+  });
+
+  // 이름 칸에서 Enter → 바로 아래에 새 행 추가 (한글 입력 중 Enter는 무시)
+  body.addEventListener('keydown', ev => {
+    const el = ev.target;
+    if(ev.key !== 'Enter' || ev.isComposing || ev.keyCode === 229) return;
+    if(!el.dataset || el.dataset.f !== 'name') return;
+    ev.preventDefault();
+    addGuestRow(el.closest('tr').dataset.id);
+  });
+
+  body.addEventListener('click', ev => {
+    const btn = ev.target.closest('.del-icon-btn');
+    if(!btn) return;
+    const tr = btn.closest('tr');
+    const g = guests.find(x => x.id === tr.dataset.id);
+    if(!g) return;
+    if(confirm(`'${g.name || '이 하객'}' 행을 삭제할까요?`)) deleteGuestDoc(g.id);
+  });
+
+  $('#guestSearch').addEventListener('input', applyGuestFilters);
+  ['guestFilterSide','guestFilterAttend','guestFilterInvite'].forEach(id => {
+    $('#' + id).addEventListener('change', applyGuestFilters);
+  });
+  $('#guestAddRowBtn').addEventListener('click', () => addGuestRow(null));
+  $('#guestAdd5RowBtn').addEventListener('click', () => addGuestRows(5));
+  $('#guestCsvBtn').addEventListener('click', exportGuestsCsv);
+}
+
+function buildDefaultSteps(){
+  return DEFAULT_STEPS.map(s => ({
+    ...s,
+    items: s.items.map(it => ({
+      id: uid(), name: it.name, desc: it.desc||'', vendor: it.vendor||'', phone:'',
+      done:false, doneDate:'', memo:'', expenseId:null
+    }))
+  }));
+}
+
+/* ============ Firestore 리스너 ============ */
+function startListeners(){
+  unsubscribers.forEach(u => u());
+  unsubscribers = [];
+
+  unsubscribers.push(onSnapshot(settingsRef, snap => {
+    weddingDate = (snap.exists() && snap.data().weddingDate) ? snap.data().weddingDate : DEFAULT_WEDDING_DATE;
+    if(!snap.exists()) saveSettings();
+    renderHero();
+    renderTimeline();
+  }, err => console.error('settings listener error', err)));
+
+  unsubscribers.push(onSnapshot(checklistRef, snap => {
+    if(snap.exists() && Array.isArray(snap.data().steps) && snap.data().steps.length){
+      steps = snap.data().steps;
+      steps.forEach(s => {
+        if(s.name===undefined) s.name = (s.title||'').replace(/^Step\s*\d+\s*·\s*/,'') || '단계';
+        s.items.forEach(it => { if(it.expenseId===undefined) it.expenseId = null; });
+      });
+      sortStepsByDate();
+    }else{
+      steps = buildDefaultSteps();
+      saveChecklist();
+    }
+    renderTimeline();
+    renderHero();
+  }, err => console.error('checklist listener error', err)));
+
+  unsubscribers.push(onSnapshot(expensesRef, snap => {
+    expenses = (snap.exists() && Array.isArray(snap.data().expenses)) ? snap.data().expenses : [];
+    expenses.forEach(e => {
+      if(e.linkedStepId===undefined) e.linkedStepId = null;
+      if(e.linkedItemId===undefined) e.linkedItemId = null;
+      if(e.totalAuto===undefined) e.totalAuto = true;
+    });
+    renderExpSummary();
+    renderExpList();
+    renderTimeline();
+    if(pendingJumpExpId){
+      const id = pendingJumpExpId;
+      pendingJumpExpId = null;
+      requestAnimationFrame(() => scrollToExpense(id));
+    }
+  }, err => console.error('expenses listener error', err)));
+
+  unsubscribers.push(onSnapshot(mbBoardsCol, snap => {
+    mbBoards = snap.docs.map(d => d.data()).sort((a,b)=> a.order-b.order);
+    if(mbBoards.length === 0){
+      seedFirstMbBoardIfEmpty();
+    }else if(!mbActiveBoardId || !mbBoards.find(b => b.id === mbActiveBoardId)){
+      mbActiveBoardId = mbBoards[0].id;
+    }
+    renderMoodboard();
+  }, err => console.error('moodboard boards listener error', err)));
+
+  unsubscribers.push(onSnapshot(mbSectionsCol, snap => {
+    mbSections = snap.docs.map(d => d.data());
+    mbSections.forEach(s => {
+      if(!s.main) s.main = {image:null, kb:null};
+      if(!s.subs) s.subs = [{image:null,kb:null},{image:null,kb:null},{image:null,kb:null}];
+      if(!s.secondMain) s.secondMain = {image:null, kb:null};
+      if(!s.layout) s.layout = 'main-subs';
+    });
+    renderMoodboard();
+  }, err => console.error('moodboard sections listener error', err)));
+
+  unsubscribers.push(onSnapshot(infoRef, snap => {
+    const remote = (snap.exists() && typeof snap.data().content === 'string') ? snap.data().content : '';
+    infoContent = remote;
+    if(infoEditor && !infoEditor.codemirror.hasFocus() && infoEditor.value() !== remote){
+      infoEditor.value(remote);
+    }else if(!infoEditor){
+      const ta = document.getElementById('infoEditor');
+      if(ta && document.activeElement !== ta && ta.value !== remote){
+        ta.value = remote;
+      }
+    }
+    const el = $('#infoSaveState');
+    if(el) el.textContent = remote ? '동기화됨' : '';
+  }, err => console.error('info note listener error', err)));
+
+  unsubscribers.push(onSnapshot(invitationRef, snap => {
+    const data = snap.exists() ? snap.data() : {};
+    inviteActiveSaved = !!data.activeId;
+    inviteHasDrafts = !!(data.drafts && Object.keys(data.drafts).length);
+    applyInviteSnapshot(data);
+    renderInviteAll(false);
+  }, err => console.error('invitation listener error', err)));
+
+  unsubscribers.push(onSnapshot(invitationPhotosCol, snap => {
+    invitationPhotos = snap.docs.map(d => d.data()).sort((a,b)=> (a.order||0)-(b.order||0));
+    if(curDraft()) renderInvitationPhotos();
+  }, err => console.error('invitation photos listener error', err)));
+
+  unsubscribers.push(onSnapshot(guestsCol, snap => {
+    snap.docChanges().forEach(ch => {
+      const id = ch.doc.id;
+      if(ch.type === 'removed'){
+        guests = guests.filter(x => x.id !== id);
+        const tr = guestRowEls.get(id);
+        if(tr){ tr.remove(); guestRowEls.delete(id); }
+        return;
+      }
+      const g = normalizeGuest(Object.assign({}, ch.doc.data(), {id}));
+      const idx = guests.findIndex(x => x.id === id);
+      if(idx >= 0) guests[idx] = g; else guests.push(g);
+      guests.sort((a, b) => (a.order || 0) - (b.order || 0));
+      const existing = guestRowEls.get(id);
+      if(existing) fillGuestRow(existing, g);
+      else insertGuestRow(g);
+    });
+    afterGuestsChanged();
+  }, err => console.error('guests listener error', err)));
+}
+
+/* ============ 렌더: 요약 ============ */
+function renderHero(){
+  if(!steps) return;
+  const wDate = new Date(weddingDate + 'T00:00:00');
+  const today = new Date();
+  const diff = daysBetween(today, wDate);
+
+  $('#weddingDateText').textContent = fmtDate(weddingDate) + ' (' + ['일','월','화','수','목','금','토'][wDate.getDay()] + ')';
+  $('#weddingDateInput').value = weddingDate;
+
+  const ddayEl = $('#ddayNumber');
+  if(diff > 0) ddayEl.textContent = 'D-' + diff;
+  else if(diff === 0) ddayEl.textContent = 'D-DAY';
+  else ddayEl.textContent = 'D+' + Math.abs(diff);
+
+  const banner = $('#nowBanner');
+  if(diff <= 0){
+    banner.classList.add('done-state');
+    $('#nowLabel').textContent = diff===0 ? '오늘' : '완료';
+    $('#nowStepName').textContent = diff===0 ? '오늘이 바로 그 날이에요.' : '결혼을 축하드려요. 즐거운 신혼 되세요.';
+    $('#nowStepSub').textContent = '';
+    return;
+  }
+  banner.classList.remove('done-state');
+
+  const stepDates = steps.map(s => subtractMonths(wDate, s.monthsBefore));
+  let currentIdx = stepDates.findIndex(d => d >= today);
+  if(currentIdx === -1) currentIdx = steps.length - 1;
+  const cur = steps[currentIdx];
+  const remain = cur.items.filter(i=>!i.done).length;
+
+  $('#nowLabel').textContent = '지금 할 일';
+  $('#nowStepName').textContent = `${stepShortTitle(cur)} — ${cur.desc}`;
+  $('#nowStepSub').textContent = remain > 0
+    ? `${monthsBeforeLabel(cur.monthsBefore)} 단계 · 남은 항목 ${remain}개`
+    : `${monthsBeforeLabel(cur.monthsBefore)} 단계 · 이 단계는 모두 완료했어요`;
+}
+
+/* ============ 렌더: 타임라인 ============ */
+function stepStatus(step, wDate, today){
+  const dueDate = subtractMonths(wDate, step.monthsBefore);
+  const total = step.items.length;
+  const done = step.items.filter(i=>i.done).length;
+  const allDone = total>0 && done===total;
+  const passed = dueDate < today;
+  let status = 'upcoming';
+  if(allDone) status = 'done';
+  else if(passed) status = 'overdue';
+  return {dueDate, total, done, allDone, passed, status};
+}
+
+function paymentStatus(e){
+  const total = Number(e.total)||0;
+  const paid = (Number(e.deposit)||0) + (Number(e.interim)||0) + (Number(e.balance)||0);
+  if(paid <= 0) return {label:'미납', cls:'chip-unpaid'};
+  if(total > 0 && paid >= total) return {label:'잔금완납', cls:'chip-paid'};
+  if(Number(e.interim) > 0) return {label:'중도금 납부', cls:'chip-interim'};
+  return {label:'계약금만 납부', cls:'chip-deposit'};
+}
+
+function renderTimeline(){
+  if(!steps) return;
+  const wDate = new Date(weddingDate + 'T00:00:00');
+  const today = new Date();
+  const stepInfos = steps.map(s => ({s, info: stepStatus(s, wDate, today)}));
+
+  let currentIdx = stepInfos.findIndex(x => x.info.dueDate >= today);
+  if(currentIdx === -1) currentIdx = steps.length - 1;
+
+  const container = $('#timelineList');
+  const openIds = new Set($$('.step-block.open').map(el => el.dataset.stepId));
+  const hadAny = container.children.length > 0;
+  container.innerHTML = '';
+
+  stepInfos.forEach(({s, info}, idx) => {
+    const block = document.createElement('div');
+    block.className = 'step-block block';
+    block.dataset.stepId = s.id;
+    const shouldOpen = (hadAny ? openIds.has(String(s.id)) : (idx === currentIdx)) || String(s.id) === String(forceOpenStepId);
+    if(shouldOpen) block.classList.add('open');
+
+    let chipHtml = '';
+    if(info.status === 'done') chipHtml = `<span class="chip chip-done">완료</span>`;
+    else if(info.status === 'overdue') chipHtml = `<span class="chip chip-overdue">지연</span>`;
+    else if(idx === currentIdx) chipHtml = `<span class="chip chip-current">진행중</span>`;
+    else chipHtml = `<span class="chip chip-upcoming">예정</span>`;
+
+    const linkedExpenses = s.items.map(it => it.expenseId ? findExpense(it.expenseId) : null).filter(Boolean);
+    const stepSpend = linkedExpenses.reduce((sum,e)=> sum+(Number(e.total)||0), 0);
+
+    const stepDayDiff = daysBetween(today, info.dueDate);
+    const stepDdayText = stepDayDiff > 0 ? ('D-'+stepDayDiff) : (stepDayDiff === 0 ? 'D-DAY' : ('D+'+Math.abs(stepDayDiff)));
+
+    block.innerHTML = `
+      <div class="step-bar">
+        <span class="outline-toggle">${shouldOpen ? '−' : '+'}</span>
+        <span class="step-num">Step ${idx+1}</span>
+        <input type="text" class="step-name-input" value="${s.name||''}" placeholder="단계 이름">
+        <span class="step-when-edit"><span class="step-dday-badge">${stepDdayText}</span> <span class="step-when-sep">·</span> <input type="number" step="0.5" min="0" class="step-months-input" value="${s.monthsBefore}">개월전 <span class="step-when-sep">·</span> <input type="date" class="step-duedate-input" value="${info.dueDate.toISOString().slice(0,10)}"></span>
+        <span class="step-bar-spacer"></span>
+        ${stepSpend>0 ? `<span class="spend-mini">${fmtWon(stepSpend)}</span>` : ''}
+        <span class="progress-mini">${info.done}/${info.total}</span>
+        ${chipHtml}
+        <button class="step-del-btn" title="이 단계 삭제">✕</button>
+      </div>
+      <div class="step-body">
+        <div class="table-scroll">
+          <table class="sheet">
+            <thead>
+              <tr>
+                <th></th><th>구분</th><th>설명</th><th>확정 업체명</th><th>업체 연락처</th><th>완료일</th><th>메모</th><th>지출</th><th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <button class="add-row-btn add-item-btn" style="margin:8px 10px 10px;">+ 항목 추가</button>
+        </div>
+      </div>
+    `;
+
+    const tbody = block.querySelector('tbody');
+    s.items.forEach(item => {
+      const tr = document.createElement('tr');
+
+      const linkedExp = item.expenseId ? findExpense(item.expenseId) : null;
+      let linkCellHtml = '';
+      if(linkedExp){
+        const st = paymentStatus(linkedExp);
+        linkCellHtml = `
+          <div class="exp-link-filled">
+            <span class="amt">${fmtWon(linkedExp.total)}</span>
+            <span class="chip ${st.cls}" style="width:fit-content;">${st.label}</span>
+            <span class="lbtns">
+              <button class="view-exp-btn">보기</button>
+              <button class="unlink-exp-btn unlink">해제</button>
+            </span>
+          </div>`;
+      }else{
+        linkCellHtml = `<button class="exp-link-empty-btn add-exp-from-item-btn">+ 추가</button>`;
+      }
+
+      tr.innerHTML = `
+        <td class="check-cell"><input type="checkbox" class="item-check" ${item.done?'checked':''}></td>
+        <td><input type="text" class="cell-input f-name ${item.done?'name-done-input':''}" value="${item.name||''}" placeholder="항목명"></td>
+        <td><input type="text" class="cell-input f-desc" value="${item.desc||''}" placeholder="설명"></td>
+        <td><input type="text" class="cell-input f-vendor" value="${item.vendor||''}" placeholder="업체명"></td>
+        <td><input type="text" class="cell-input f-phone" value="${item.phone||''}" placeholder="010-0000-0000"></td>
+        <td><input type="date" class="cell-input f-donedate" value="${item.doneDate||''}"></td>
+        <td><input type="text" class="cell-input f-memo" value="${item.memo||''}" placeholder="메모"></td>
+        <td class="exp-link-cell">${linkCellHtml}</td>
+        <td class="del-item-cell"><button class="del-icon-btn del-item-btn" title="항목 삭제">✕</button></td>
+      `;
+
+      tr.querySelector('.item-check').addEventListener('change', (ev) => {
+        item.done = ev.target.checked;
+        if(item.done && !item.doneDate) item.doneDate = todayStr();
+        if(!item.done) item.doneDate = '';
+        saveChecklist();
+      });
+      tr.querySelector('.f-name').addEventListener('change', e => { item.name = e.target.value; saveChecklist(); });
+      tr.querySelector('.f-desc').addEventListener('change', e => { item.desc = e.target.value; saveChecklist(); });
+      tr.querySelector('.f-vendor').addEventListener('change', e => { item.vendor = e.target.value; saveChecklist(); });
+      tr.querySelector('.f-phone').addEventListener('change', e => { item.phone = e.target.value; saveChecklist(); });
+      tr.querySelector('.f-donedate').addEventListener('change', e => { item.doneDate = e.target.value; saveChecklist(); });
+      tr.querySelector('.f-memo').addEventListener('change', e => { item.memo = e.target.value; saveChecklist(); });
+
+      const addBtn = tr.querySelector('.add-exp-from-item-btn');
+      if(addBtn) addBtn.addEventListener('click', () => addExpenseFromItem(s, item));
+      const viewBtn = tr.querySelector('.view-exp-btn');
+      if(viewBtn) viewBtn.addEventListener('click', () => jumpToExpense(item.expenseId));
+      const unlinkBtn = tr.querySelector('.unlink-exp-btn');
+      if(unlinkBtn) unlinkBtn.addEventListener('click', () => {
+        const exp = findExpense(item.expenseId);
+        if(exp){ exp.linkedStepId = null; exp.linkedItemId = null; }
+        item.expenseId = null;
+        saveChecklist();
+        saveExpenses();
+      });
+      tr.querySelector('.del-item-btn').addEventListener('click', () => {
+        if(confirm(`'${item.name||'이 항목'}'을(를) 삭제할까요?`)){
+          if(item.expenseId){
+            const exp = findExpense(item.expenseId);
+            if(exp){ exp.linkedStepId = null; exp.linkedItemId = null; saveExpenses(); }
+          }
+          s.items = s.items.filter(x => x.id !== item.id);
+          forceOpenStepId = s.id;
+          saveChecklist();
+        }
+      });
+
+      tbody.appendChild(tr);
+    });
+
+    block.querySelector('.add-item-btn').addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const newItem = { id: uid(), name:'', desc:'', vendor:'', phone:'', done:false, doneDate:'', memo:'', expenseId:null };
+      s.items.push(newItem);
+      forceOpenStepId = s.id;
+      saveChecklist();
+    });
+
+    const nameInput = block.querySelector('.step-name-input');
+    nameInput.addEventListener('click', ev => ev.stopPropagation());
+    nameInput.addEventListener('change', ev => {
+      s.name = ev.target.value;
+      forceOpenStepId = s.id;
+      saveChecklist();
+    });
+
+    const monthsInput = block.querySelector('.step-months-input');
+    monthsInput.addEventListener('click', ev => ev.stopPropagation());
+    monthsInput.addEventListener('focus', function(){ this.select(); });
+    monthsInput.addEventListener('change', ev => {
+      const v = parseFloat(ev.target.value);
+      s.monthsBefore = isNaN(v) ? 0 : v;
+      forceOpenStepId = s.id;
+      sortStepsByDate();
+      saveChecklist();
+    });
+
+    const dueDateInput = block.querySelector('.step-duedate-input');
+    dueDateInput.addEventListener('click', ev => ev.stopPropagation());
+    dueDateInput.addEventListener('change', ev => {
+      const picked = ev.target.value;
+      if(!picked) return;
+      const wD = new Date(weddingDate + 'T00:00:00');
+      const pD = new Date(picked + 'T00:00:00');
+      const days = daysBetween(pD, wD);
+      s.monthsBefore = Math.round((days/30.4368)*10)/10;
+      forceOpenStepId = s.id;
+      sortStepsByDate();
+      saveChecklist();
+    });
+
+    block.querySelector('.step-del-btn').addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      if(confirm(`'${s.name||'이 단계'}' 전체를 삭제할까요? 이 단계의 모든 항목이 함께 삭제돼요.`)){
+        s.items.forEach(item => {
+          if(item.expenseId){
+            const exp = findExpense(item.expenseId);
+            if(exp){ exp.linkedStepId = null; exp.linkedItemId = null; }
+          }
+        });
+        steps = steps.filter(x => x.id !== s.id);
+        saveChecklist();
+        saveExpenses();
+      }
+    });
+
+    block.querySelector('.step-bar').addEventListener('click', () => {
+      block.classList.toggle('open');
+      block.querySelector('.outline-toggle').textContent = block.classList.contains('open') ? '−' : '+';
+    });
+
+    container.appendChild(block);
+  });
+
+  forceOpenStepId = null;
+}
+
+/* ============ 렌더: 지출 장부 ============ */
+function renderExpSummary(){
+  const totalBudget = expenses.reduce((sum,e)=> sum + (Number(e.total)||0), 0);
+  const totalPaid = expenses.reduce((sum,e)=> sum + (Number(e.deposit)||0)+(Number(e.interim)||0)+(Number(e.balance)||0), 0);
+  const remaining = totalBudget - totalPaid;
+  const unpaidCount = expenses.filter(e => paymentStatus(e).label !== '잔금완납').length;
+
+  $('#expSummary').innerHTML = `
+    <div class="summary-cell"><div class="label">총 예산 합계</div><div class="value">${fmtWon(totalBudget)}</div></div>
+    <div class="summary-cell accent"><div class="label">지금까지 납부액</div><div class="value">${fmtWon(totalPaid)}</div></div>
+    <div class="summary-cell warn"><div class="label">남은 잔액</div><div class="value">${fmtWon(Math.max(remaining,0))}</div></div>
+    <div class="summary-cell"><div class="label">미완납 건수</div><div class="value">${unpaidCount}건</div></div>
+  `;
+}
+
+function renderExpList(){
+  const tbody = $('#expTableBody');
+  const table = $('#expTable');
+  const emptyNote = $('#expEmptyNote');
+  tbody.innerHTML = '';
+
+  if(expenses.length === 0){
+    table.style.display = 'none';
+    emptyNote.style.display = 'block';
+    return;
+  }
+  table.style.display = '';
+  emptyNote.style.display = 'none';
+
+  const sorted = [...expenses].sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+
+  sorted.forEach(e => {
+    const status = paymentStatus(e);
+    const tr = document.createElement('tr');
+    tr.dataset.expId = e.id;
+
+    let linkText = '-';
+    if(e.linkedStepId!=null && e.linkedItemId!=null){
+      const {step, item} = findItem(e.linkedStepId, e.linkedItemId);
+      if(step && item) linkText = `${stepShortTitle(step)} · ${item.name}`;
+    }
+
+    tr.innerHTML = `
+      <td><input type="date" class="cell-input p-date" value="${e.date||''}"></td>
+      <td><input type="text" class="cell-input p-name" value="${e.name||''}" placeholder="항목명"></td>
+      <td><input type="text" class="cell-input p-vendor" value="${e.vendor||''}" placeholder="업체명"></td>
+      <td class="num"><input type="number" class="cell-input p-total" value="${e.total||''}" placeholder="0"></td>
+      <td class="num"><input type="number" class="cell-input p-deposit" value="${e.deposit||''}" placeholder="0"></td>
+      <td class="num"><input type="number" class="cell-input p-interim" value="${e.interim||''}" placeholder="0"></td>
+      <td class="num"><input type="number" class="cell-input p-balance" value="${e.balance||''}" placeholder="0"></td>
+      <td class="status-cell"><span class="chip ${status.cls}">${status.label}</span></td>
+      <td><input type="text" class="cell-input p-memo" value="${e.memo||''}" placeholder="메모"></td>
+      <td class="link-cell">${linkText}</td>
+      <td class="del-cell"><button class="del-icon-btn" title="삭제">✕</button></td>
+    `;
+
+    tr.querySelector('.p-date').addEventListener('change', ev => { e.date = ev.target.value; saveExpenses(); });
+    tr.querySelector('.p-name').addEventListener('change', ev => { e.name = ev.target.value; saveExpenses(); });
+    tr.querySelector('.p-vendor').addEventListener('change', ev => { e.vendor = ev.target.value; saveExpenses(); });
+
+    // 총금액은 직접 입력할 수도 있고, 비워두면(자동 모드) 계약금+중도금+잔금 합계를 자동으로 반영해요.
+    const recalcTotalIfAuto = () => {
+      if(e.totalAuto !== false){
+        e.total = (Number(e.deposit)||0) + (Number(e.interim)||0) + (Number(e.balance)||0);
+      }
+    };
+    tr.querySelector('.p-total').addEventListener('change', ev => {
+      e.total = ev.target.value;
+      e.totalAuto = false; // 사용자가 직접 총금액을 적으면 이후로는 자동 합산을 멈춤
+      saveExpenses();
+    });
+    tr.querySelector('.p-deposit').addEventListener('change', ev => { e.deposit = ev.target.value; recalcTotalIfAuto(); saveExpenses(); });
+    tr.querySelector('.p-interim').addEventListener('change', ev => { e.interim = ev.target.value; recalcTotalIfAuto(); saveExpenses(); });
+    tr.querySelector('.p-balance').addEventListener('change', ev => { e.balance = ev.target.value; recalcTotalIfAuto(); saveExpenses(); });
+    tr.querySelector('.p-memo').addEventListener('change', ev => { e.memo = ev.target.value; saveExpenses(); });
+
+    // 숫자 칸에 포커스하면 기존 값이 전체 선택돼서, 바로 타이핑해도 앞에 0이 안 남아요.
+    ['.p-total','.p-deposit','.p-interim','.p-balance'].forEach(sel => {
+      tr.querySelector(sel).addEventListener('focus', function(){ this.select(); });
+    });
+
+    tr.querySelector('.del-icon-btn').addEventListener('click', () => {
+      if(confirm(`'${e.name||'이 항목'}'을(를) 삭제할까요?`)){
+        if(e.linkedStepId!=null && e.linkedItemId!=null){
+          const {item} = findItem(e.linkedStepId, e.linkedItemId);
+          if(item){ item.expenseId = null; saveChecklist(); }
+        }
+        expenses = expenses.filter(x => x.id !== e.id);
+        saveExpenses();
+      }
+    });
+
+    tbody.appendChild(tr);
+  });
+}
+
+function addExpenseFromItem(step, item){
+  const newExp = {
+    id: uid(), name: item.name, vendor: item.vendor||'', date: todayStr(),
+    total:0, deposit:0, interim:0, balance:0, memo:'', totalAuto:true,
+    linkedStepId: step.id, linkedItemId: item.id
+  };
+  expenses.push(newExp);
+  item.expenseId = newExp.id;
+  saveChecklist();
+  saveExpenses();
+  pendingJumpExpId = newExp.id;
+  switchTab('expenses');
+}
+
+function jumpToExpense(expId){
+  switchTab('expenses');
+  requestAnimationFrame(() => scrollToExpense(expId));
+}
+
+function scrollToExpense(expId){
+  const rowEl = document.querySelector(`#expTableBody tr[data-exp-id="${expId}"]`);
+  if(rowEl){
+    rowEl.scrollIntoView({behavior:'smooth', block:'center'});
+    const totalInput = rowEl.querySelector('.p-total');
+    if(totalInput) totalInput.focus();
+  }
+}
+
+function switchTab(tab){
+  $$('.tab-btn').forEach(b=>b.classList.remove('active'));
+  $$('.panel').forEach(p=>p.classList.remove('active'));
+  $(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
+  $('#panel-' + tab).classList.add('active');
+  if(tab === 'infosheet' && infoEditor){
+    setTimeout(() => infoEditor.codemirror.refresh(), 0);
+  }
+}
+
+/* ============ 렌더: 시안(무드보드) ============ */
+function mbActiveBoard(){ return mbBoards.find(b => b.id === mbActiveBoardId) || null; }
+
+function renderMbTabs(){
+  const bar = $('#mbTabBar');
+  bar.innerHTML = '';
+  mbBoards.forEach(b => {
+    const tab = document.createElement('div');
+    tab.className = 'mb-tab' + (b.id === mbActiveBoardId ? ' active' : '');
+
+    if(mbEditingBoardId === b.id){
+      const nameInput = document.createElement('input');
+      nameInput.className = 'mb-tab-name-input';
+      nameInput.value = b.name;
+      tab.appendChild(nameInput);
+      const commit = () => {
+        const v = nameInput.value.trim();
+        if(v && v !== b.name){ b.name = v; saveMbBoard(b); }
+        mbEditingBoardId = null;
+        renderMbTabs();
+      };
+      nameInput.addEventListener('keydown', ev => {
+        if(ev.key === 'Enter') commit();
+        if(ev.key === 'Escape'){ mbEditingBoardId = null; renderMbTabs(); }
+      });
+      nameInput.addEventListener('blur', commit);
+      nameInput.addEventListener('click', ev => ev.stopPropagation());
+      setTimeout(() => { nameInput.focus(); nameInput.select(); }, 0);
+    }else{
+      const label = document.createElement('span');
+      label.textContent = b.name;
+      label.addEventListener('dblclick', ev => {
+        ev.stopPropagation();
+        mbEditingBoardId = b.id;
+        renderMbTabs();
+      });
+      tab.appendChild(label);
+    }
+
+    if(mbBoards.length > 1){
+      const x = document.createElement('span');
+      x.className = 'mb-tab-x';
+      x.textContent = '✕';
+      x.title = '보드 삭제';
+      x.addEventListener('click', ev => {
+        ev.stopPropagation();
+        if(confirm(`'${b.name}' 보드를 삭제할까요? 안의 사진과 설명도 함께 삭제돼요.`)){
+          deleteMbBoard(b.id);
+        }
+      });
+      tab.appendChild(x);
+    }
+
+    tab.addEventListener('click', () => {
+      if(mbEditingBoardId === b.id) return;
+      mbActiveBoardId = b.id;
+      mbSelectedKey = null;
+      renderMoodboard();
+    });
+    bar.appendChild(tab);
+  });
+
+  const addTab = document.createElement('div');
+  addTab.className = 'mb-tab mb-tab-add';
+  addTab.textContent = '+';
+  addTab.title = '보드 추가';
+  addTab.addEventListener('click', async () => {
+    const board = createMbBoard(mbBoards.length);
+    await saveMbBoard(board);
+    const sections = [0,1,2].map(i => emptyMbSection(board.id, i));
+    await Promise.all(sections.map(saveMbSection));
+    mbActiveBoardId = board.id;
+    mbSelectedKey = null;
+  });
+  bar.appendChild(addTab);
+}
+
+function mbGetSlotData(section, type, subIdx){
+  if(type === 'main') return section.main;
+  if(type === 'second') return section.secondMain;
+  return section.subs[subIdx];
+}
+
+function mbBuildSlot(section, type, subIdx, flexStyle){
+  const key = type === 'sub' ? (section.id+'-sub-'+subIdx) : (section.id+'-'+type);
+  const data = mbGetSlotData(section, type, subIdx);
+  const holder = document.createElement('div');
+  holder.style.cssText = flexStyle + ';min-width:0;min-height:0;';
+
+  const slot = document.createElement('div');
+  slot.className = 'mb-slot' + (mbSelectedKey === key ? ' selected' : '');
+
+  if(data.image){
+    slot.innerHTML = `<img class="mb-photo" src="${data.image}">`;
+  }else{
+    const label = type === 'main' ? '메인 사진' : '';
+    slot.innerHTML = `<div class="mb-placeholder">${label ? '<span>'+label+'</span>' : ''}<span>드래그 또는 Ctrl+V</span></div>`;
+  }
+
+  if(data.image && data.kb){
+    const tag = document.createElement('span');
+    tag.className = 'mb-kb-tag';
+    tag.textContent = data.kb + 'KB';
+    slot.appendChild(tag);
+  }
+
+  if(data.image){
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'mb-remove';
+    removeBtn.title = '사진 삭제';
+    removeBtn.textContent = '✕';
+    removeBtn.addEventListener('click', ev => {
+      ev.stopPropagation();
+      data.image = null; data.kb = null;
+      saveMbSection(section);
+    });
+    slot.appendChild(removeBtn);
+  }
+
+  slot.addEventListener('click', () => { mbSelectedKey = key; renderMbBoard(); });
+  slot.addEventListener('dragover', ev => { ev.preventDefault(); slot.classList.add('dragover'); });
+  slot.addEventListener('dragleave', () => slot.classList.remove('dragover'));
+  slot.addEventListener('drop', ev => {
+    ev.preventDefault();
+    slot.classList.remove('dragover');
+    const file = ev.dataTransfer.files && ev.dataTransfer.files[0];
+    if(file && file.type.indexOf('image') === 0){
+      compressImage(file).then(res => {
+        data.image = res.url; data.kb = res.kb;
+        mbSelectedKey = key;
+        saveMbSection(section);
+      });
+    }
+  });
+
+  holder.appendChild(slot);
+  return holder;
+}
+
+function renderMbBoard(){
+  const board = mbActiveBoard();
+  const row = $('#mbBoardRow');
+  row.innerHTML = '';
+  if(!board){ $('#mbSecCount').textContent = ''; return; }
+
+  const sections = mbBoardSections(board.id);
+  $('#mbSecCount').textContent = sections.length + '개 섹션';
+
+  sections.forEach(section => {
+    const col = document.createElement('div');
+    col.className = 'mb-col';
+
+    const toggleRow = document.createElement('div');
+    toggleRow.className = 'mb-layout-toggle';
+    const btnMain = document.createElement('button');
+    btnMain.className = 'mb-layout-btn' + (section.layout !== 'big-x2' ? ' active' : '');
+    btnMain.textContent = '메인+서브';
+    btnMain.addEventListener('click', () => {
+      if(section.layout === 'big-x2'){ section.layout = 'main-subs'; saveMbSection(section); }
+    });
+    const btnBig = document.createElement('button');
+    btnBig.className = 'mb-layout-btn' + (section.layout === 'big-x2' ? ' active' : '');
+    btnBig.textContent = '빅포토×2';
+    btnBig.addEventListener('click', () => {
+      if(section.layout !== 'big-x2'){ section.layout = 'big-x2'; saveMbSection(section); }
+    });
+    toggleRow.appendChild(btnMain);
+    toggleRow.appendChild(btnBig);
+    col.appendChild(toggleRow);
+
+    const titleInput = document.createElement('input');
+    titleInput.className = 'mb-title-input';
+    titleInput.placeholder = '예: 실내 컨셉 1';
+    titleInput.value = section.title || '';
+    titleInput.addEventListener('change', ev => {
+      section.title = ev.target.value;
+      saveMbSection(section);
+    });
+    col.appendChild(titleInput);
+
+    if(section.layout === 'big-x2'){
+      col.appendChild(mbBuildSlot(section, 'main', null, 'flex:1 1 0'));
+      col.appendChild(mbBuildSlot(section, 'second', null, 'flex:1 1 0'));
+    }else{
+      col.appendChild(mbBuildSlot(section, 'main', null, 'flex:4 1 0'));
+
+      const subRow = document.createElement('div');
+      subRow.className = 'mb-sub-row';
+      for(let i=0;i<3;i++){
+        subRow.appendChild(mbBuildSlot(section, 'sub', i, 'flex:1 1 0'));
+      }
+      col.appendChild(subRow);
+
+      const capHolder = document.createElement('div');
+      capHolder.style.cssText = 'flex:1.3 1 0; min-height:0;';
+      const cap = document.createElement('textarea');
+      cap.className = 'mb-caption';
+      cap.placeholder = '이 섹션 설명 입력';
+      cap.value = section.caption || '';
+      cap.addEventListener('change', ev => {
+        section.caption = ev.target.value;
+        saveMbSection(section);
+      });
+      capHolder.appendChild(cap);
+      col.appendChild(capHolder);
+    }
+
+    row.appendChild(col);
+  });
+}
+
+function renderMoodboard(){
+  renderMbTabs();
+  renderMbBoard();
+}
+
+/* ============ 인쇄/PDF: 사진 안 잘리게 별도 뷰로 그려서 출력 ============ */
+function buildPrintArea(){
+  const area = $('#printArea');
+  area.innerHTML = '';
+  let sortedBoards = [...mbBoards].sort((a,b)=> a.order-b.order);
+  if(mbPrintScope === 'current'){
+    const cur = mbActiveBoard();
+    sortedBoards = cur ? [cur] : [];
+  }
+  sortedBoards.forEach(board => {
+    const page = document.createElement('div');
+    page.className = 'print-page';
+
+    const sections = mbBoardSections(board.id);
+    sections.forEach(section => {
+      const col = document.createElement('div');
+      col.className = 'print-col';
+
+      const title = document.createElement('div');
+      title.className = 'print-title';
+      title.textContent = section.title || '';
+      col.appendChild(title);
+
+      if(section.layout === 'big-x2'){
+        [section.main, section.secondMain].forEach(slot => {
+          const box = document.createElement('div');
+          box.className = 'print-main-photo';
+          box.style.flex = '1 1 0';
+          if(slot.image){
+            const img = document.createElement('img');
+            img.src = slot.image;
+            box.appendChild(img);
+          }
+          col.appendChild(box);
+        });
+      }else{
+        const mainBox = document.createElement('div');
+        mainBox.className = 'print-main-photo';
+        if(section.main.image){
+          const img = document.createElement('img');
+          img.src = section.main.image;
+          mainBox.appendChild(img);
+        }
+        col.appendChild(mainBox);
+
+        const subRow = document.createElement('div');
+        subRow.className = 'print-sub-row';
+        section.subs.forEach(sub => {
+          const box = document.createElement('div');
+          box.className = 'print-sub-photo';
+          if(sub.image){
+            const img = document.createElement('img');
+            img.src = sub.image;
+            box.appendChild(img);
+          }
+          subRow.appendChild(box);
+        });
+        col.appendChild(subRow);
+
+        const cap = document.createElement('div');
+        cap.className = 'print-caption';
+        cap.textContent = section.caption || '';
+        col.appendChild(cap);
+      }
+
+      page.appendChild(col);
+    });
+
+    area.appendChild(page);
+  });
+}
+window.addEventListener('beforeprint', buildPrintArea);
+
+/* ============ 이벤트 바인딩 ============ */
+function bindTabs(){
+  $$('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+}
+
+function bindMoodboard(){
+  $('#mbPrintBtn').addEventListener('click', () => {
+    const board = mbActiveBoard();
+    $('#printAllCount').textContent = mbBoards.length;
+    $('#printCurrentName').textContent = board ? board.name : '-';
+    const scopeInputs = document.getElementsByName('printScope');
+    for(const input of scopeInputs){ input.checked = (input.value === mbPrintScope); }
+    $('#printModalOverlay').classList.add('open');
+  });
+  $('#printModalCancelBtn').addEventListener('click', () => {
+    $('#printModalOverlay').classList.remove('open');
+  });
+  $('#printModalOverlay').addEventListener('click', (ev) => {
+    if(ev.target.id === 'printModalOverlay') $('#printModalOverlay').classList.remove('open');
+  });
+  $('#printModalConfirmBtn').addEventListener('click', () => {
+    const checked = document.querySelector('input[name="printScope"]:checked');
+    mbPrintScope = checked ? checked.value : 'all';
+    $('#printModalOverlay').classList.remove('open');
+    buildPrintArea();
+    window.print();
+  });
+  $('#mbSecMinus').addEventListener('click', () => {
+    const board = mbActiveBoard();
+    if(!board) return;
+    const sections = mbBoardSections(board.id);
+    if(sections.length > 2){
+      deleteMbSection(sections[sections.length-1].id);
+    }
+  });
+  $('#mbSecPlus').addEventListener('click', () => {
+    const board = mbActiveBoard();
+    if(!board) return;
+    const sections = mbBoardSections(board.id);
+    if(sections.length < 4){
+      saveMbSection(emptyMbSection(board.id, sections.length));
+    }
+  });
+  $('#mbClearBtn').addEventListener('click', () => {
+    const board = mbActiveBoard();
+    if(!board) return;
+    if(confirm('이 보드의 사진과 설명을 모두 지울까요?')){
+      mbBoardSections(board.id).forEach(s => {
+        s.title=''; s.caption='';
+        s.main = {image:null,kb:null};
+        s.secondMain = {image:null,kb:null};
+        s.subs = [{image:null,kb:null},{image:null,kb:null},{image:null,kb:null}];
+        saveMbSection(s);
+      });
+    }
+  });
+  document.addEventListener('paste', ev => {
+    if(!mbSelectedKey) return;
+    const mbPanel = $('#panel-moodboard');
+    if(!mbPanel || !mbPanel.classList.contains('active')) return;
+    const items = ev.clipboardData && ev.clipboardData.items;
+    if(!items) return;
+    for(let i=0;i<items.length;i++){
+      const item = items[i];
+      if(item.type.indexOf('image') === 0){
+        const blob = item.getAsFile();
+        const dashIdx = mbSelectedKey.indexOf('-');
+        const sectionId = mbSelectedKey.slice(0, dashIdx);
+        const rest = mbSelectedKey.slice(dashIdx+1);
+        const section = mbSections.find(s => s.id === sectionId);
+        if(!section) return;
+        const type = rest.indexOf('sub') === 0 ? 'sub' : (rest === 'second' ? 'second' : 'main');
+        const subIdx = type === 'sub' ? parseInt(rest.split('-')[1]) : null;
+        const data = mbGetSlotData(section, type, subIdx);
+        compressImage(blob).then(res => {
+          data.image = res.url; data.kb = res.kb;
+          saveMbSection(section);
+        });
+        ev.preventDefault();
+        break;
+      }
+    }
+  });
+}
+
+function bindDateEdit(){
+  $('#editDateBtn').addEventListener('click', () => {
+    $('#dateEditRow').classList.toggle('open');
+  });
+  $('#saveDateBtn').addEventListener('click', async () => {
+    const v = $('#weddingDateInput').value;
+    if(v){
+      weddingDate = v;
+      await saveSettings();
+      $('#dateEditRow').classList.remove('open');
+    }
+  });
+}
+
+function bindAddStep(){
+  $('#addStepBtn').addEventListener('click', () => {
+    if(!steps) return;
+    const minMonths = steps.length ? Math.min(...steps.map(s=>Number(s.monthsBefore)||0)) : 1;
+    const newStep = {
+      id: uid(), name:'새 단계', monthsBefore: Math.max(0, minMonths - 1), desc:'',
+      items: []
+    };
+    steps.push(newStep);
+    sortStepsByDate();
+    forceOpenStepId = newStep.id;
+    saveChecklist();
+  });
+}
+
+function bindAddExpRow(){
+  $('#addExpRowBtn').addEventListener('click', () => {
+    const newExp = { id: uid(), name:'', vendor:'', date: todayStr(), total:0, deposit:0, interim:0, balance:0, memo:'', totalAuto:true, linkedStepId:null, linkedItemId:null };
+    expenses.push(newExp);
+    saveExpenses();
+    pendingJumpExpId = newExp.id;
+    requestAnimationFrame(() => {
+      const rowEl = document.querySelector(`#expTableBody tr[data-exp-id="${newExp.id}"]`);
+      if(rowEl){
+        rowEl.scrollIntoView({behavior:'smooth', block:'center'});
+        const nameInput = rowEl.querySelector('.p-name');
+        if(nameInput) nameInput.focus();
+      }
+      pendingJumpExpId = null;
+    });
+  });
+}
+
+/* ============ 로그인 / 인증 ============ */
+function bindAuth(){
+  $('#loginBtn').addEventListener('click', doLogin);
+  $('#loginPassword').addEventListener('keydown', ev => { if(ev.key==='Enter') doLogin(); });
+  $('#logoutBtn').addEventListener('click', () => signOut(auth));
+
+  async function doLogin(){
+    const email = $('#loginEmail').value.trim();
+    const password = $('#loginPassword').value;
+    $('#loginError').textContent = '';
+    if(!email || !password){
+      $('#loginError').textContent = '이메일과 비밀번호를 입력해주세요.';
+      return;
+    }
+    try{
+      await signInWithEmailAndPassword(auth, email, password);
+    }catch(err){
+      $('#loginError').textContent = '로그인에 실패했어요. 이메일/비밀번호를 확인해주세요.';
+    }
+  }
+}
+
+function showApp(user){
+  $('#loginScreen').style.display = 'none';
+  $('#appRoot').style.display = 'block';
+  $('#userEmail').textContent = user.email || '';
+  startListeners();
+}
+function showLogin(){
+  unsubscribers.forEach(u => u());
+  unsubscribers = [];
+  steps = null; expenses = [];
+  mbBoards = []; mbSections = []; mbActiveBoardId = null; mbSelectedKey = null; mbEditingBoardId = null; mbSeeded = false;
+  infoContent = '';
+  if(infoEditor){ infoEditor.value(''); }
+  else{ const ta = document.getElementById('infoEditor'); if(ta) ta.value=''; }
+  inviteDrafts = {}; inviteActiveId = null; inviteCurId = 'main'; inviteEditingId = null; inviteActiveSaved = false; inviteHasDrafts = false; clearTimeout(inviteSaveTimer); inviteSaveTimer = null;
+  invitationPhotos = [];
+  resetGuestView();
+  $('#appRoot').style.display = 'none';
+  $('#loginScreen').style.display = 'flex';
+  $('#loginEmail').value = '';
+  $('#loginPassword').value = '';
+  $('#loginError').textContent = '';
+}
+
+/* ============ 초기화 ============ */
+bindTabs();
+bindDateEdit();
+bindAddStep();
+bindAddExpRow();
+bindMoodboard();
+bindInfoSheet();
+initInfoEditor();
+bindInvitationTab();
+bindMetaEditor();
+bindGuestTab();
+bindAuth();
+
+onAuthStateChanged(auth, (user) => {
+  if(user) showApp(user);
+  else showLogin();
+});
+</script>
+</body>
+</html>
