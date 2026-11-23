@@ -16,3 +16,8 @@
   (저장하면 main 브랜치에 커밋되고 GitHub Actions 가 다시 배포합니다)
 
 2단계에서 이 파일들을 `src/features/wedding/` 의 Vue 컴포넌트로 옮깁니다.
+
+
+## Firebase 프로젝트
+
+이 폴더의 `firebaseConfig` 는 로컬 개발용 기본값(기존 wedding-log-ab8be)이에요. 배포할 때 `scripts/postbuild.mjs` 가 사이트의 `VITE_FIREBASE_*` 값으로 바꿔 넣어서, 웨딩플래너도 사이트와 같은 프로젝트를 씁니다. 기존 데이터는 사이트의 `/wedding/migrate` 화면에서 복사하세요.

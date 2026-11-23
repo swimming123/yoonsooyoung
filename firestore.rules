@@ -1,13 +1,14 @@
 rules_version = '2';
 
-// Firebase 프로젝트: wedding-log-ab8be (기존 웨딩플래너와 새 사이트가 함께 씀)
+// Firebase 프로젝트: 사이트(VITE_FIREBASE_PROJECT_ID, 지금은 yoonsooyoung). 웨딩플래너 페이지도 배포 때 같은 프로젝트로 연결됩니다.
+// 기존 웨딩플래너 프로젝트(wedding-log-ab8be)의 데이터는 /wedding/migrate 화면에서 복사합니다.
 // 공개 레포 + 공개 Firebase 설정값이므로 이 규칙이 데이터를 지키는 유일한 방어선입니다.
 // 적용: Firebase 콘솔 → Firestore Database → 규칙 탭에 이 파일 내용을 붙여넣고 「게시」
 service cloud.firestore {
   match /databases/{database}/documents {
 
     // 데이터를 고칠 수 있는 계정(uid) 목록.
-    // Firebase 콘솔 → Authentication → 사용자 에서 웨딩플래너에 로그인하던 계정들의 uid 를 모두 넣으세요.
+    // 사이트 프로젝트의 Firebase 콘솔 → Authentication → 사용자 에서 로그인하는 계정들의 uid 를 모두 넣으세요.
     // 예: ['abc123...', 'def456...']
     function isOwner() {
       return request.auth != null

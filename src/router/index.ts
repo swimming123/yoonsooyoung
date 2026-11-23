@@ -43,6 +43,12 @@ export const router = createRouter({
       meta: { requiresOwner: true, title: '웨딩플래너', wide: true },
     },
     {
+      path: '/wedding/migrate',
+      name: 'wedding-migrate',
+      component: () => import('@/features/wedding/WeddingMigrateView.vue'),
+      meta: { requiresOwner: true, title: '웨딩플래너 데이터 옮기기' },
+    },
+    {
       path: '/wedding/invitation',
       name: 'invitation-editor',
       component: () => import('@/features/invitation/InvitationEditorView.vue'),

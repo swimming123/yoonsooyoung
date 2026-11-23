@@ -222,7 +222,7 @@ export function describeError(e: unknown): string {
   const message = e instanceof Error ? e.message : String(e)
   const code = (e as { code?: string })?.code
   if (code === 'permission-denied' || /insufficient permissions/i.test(message)) {
-    return `권한이 없어요. 이 사이트가 연결된 Firebase 프로젝트: ${firebaseOptions.projectId || '(없음)'} — 웨딩플래너는 wedding-log-ab8be 를 써요.`
+    return `권한이 없어요. (Firebase 프로젝트: ${firebaseOptions.projectId || '(없음)'}) Firestore 규칙에 지금 계정 uid 가 있는지, 웨딩플래너 데이터를 옮겼는지(/wedding/migrate) 확인해 주세요.`
   }
   return message
 }

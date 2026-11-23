@@ -51,3 +51,29 @@ await writeFile(join(dist, '404.html'), shell)
 await writeFile(join(dist, '.nojekyll'), '')
 
 console.log(`postbuild: 글 ${posts.length}개 페이지, 404.html, .nojekyll 생성`)
+
+// 3) 웨딩플래너 정적 페이지(dist/wedding/*.html)도 사이트와 같은 Firebase 프로젝트를 쓰게 합니다.
+//    파일 안의 firebaseConfig 는 로컬 개발용 기본값이고, 배포할 때 VITE_FIREBASE_* 값으로 바꿔 넣어요.
+const clean = (v) => (v ?? '').trim().replace(/,$/, '').trim().replace(/^["'`]|["'`]$/g, '').trim()
+const siteConfig = {
+  apiKey: clean(process.env.VITE_FIREBASE_API_KEY),
+  authDomain: clean(process.env.VITE_FIREBASE_AUTH_DOMAIN),
+  projectId: clean(process.env.VITE_FIREBASE_PROJECT_ID),
+  storageBucket: clean(process.env.VITE_FIREBASE_STORAGE_BUCKET),
+  messagingSenderId: clean(process.env.VITE_FIREBASE_MESSAGING_SENDER_ID),
+  appId: clean(process.env.VITE_FIREBASE_APP_ID),
+}
+if (siteConfig.apiKey && siteConfig.projectId) {
+  const weddingDir = join(dist, 'wedding')
+  for (const f of (await readdir(weddingDir)).filter((n) => n.endsWith('.html'))) {
+    const path = join(weddingDir, f)
+    const html = await readFile(path, 'utf8')
+    const next = html.replace(
+      /const firebaseConfig = \{[\s\S]*?\};/,
+      `const firebaseConfig = ${JSON.stringify(siteConfig, null, 2)};`,
+    )
+    if (next === html) throw new Error(`${f}: firebaseConfig 를 찾지 못했어요`)
+    await writeFile(path, next)
+  }
+  console.log(`postbuild: 웨딩플래너 페이지를 Firebase 프로젝트 ${siteConfig.projectId} 에 연결`)
+}

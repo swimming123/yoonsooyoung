@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 // 1단계: 기존 웨딩플래너(public/wedding/*.html)를 그대로 iframe 으로 보여줍니다.
-// 같은 도메인·같은 Firebase 프로젝트라서 데이터와 로그인 상태가 그대로 이어집니다.
+// 배포할 때 postbuild 가 이 페이지들의 Firebase 설정을 사이트와 같은 프로젝트로 바꿔 넣어서
+// 데이터와 로그인 상태가 사이트와 그대로 이어집니다. (기존 프로젝트 데이터는 /wedding/migrate 로 옮김)
 // 2단계에서 이 화면을 Vue 컴포넌트로 옮기고 Firestore 접근은 repository 로 감쌉니다.
 const base = `${import.meta.env.BASE_URL}wedding/`
 const editor = `${base}index.html`
@@ -16,6 +17,7 @@ const invite = `${base}invite.html`
       <a :href="editor" target="_blank" rel="noopener">새 창에서 열기 ↗</a>
       <a :href="timeline" target="_blank" rel="noopener">공개 타임라인 ↗</a>
       <RouterLink :to="{ name: 'invitation-editor' }">청첩장 꾸미기</RouterLink>
+      <RouterLink :to="{ name: 'wedding-migrate' }">데이터 옮기기</RouterLink>
       <a :href="invite" target="_blank" rel="noopener">기존 모바일 청첩장 ↗</a>
     </nav>
   </div>
