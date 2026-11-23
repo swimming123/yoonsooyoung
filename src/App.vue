@@ -20,6 +20,8 @@ async function logout() {
 </script>
 
 <template>
+  <RouterView v-if="route.meta.bare" />
+  <template v-else>
   <header class="site-header">
     <RouterLink to="/" class="brand">yoonsooyoung</RouterLink>
     <nav>
@@ -37,4 +39,5 @@ async function logout() {
   <main class="container" :class="{ wide: route.meta.wide }">
     <RouterView />
   </main>
+  </template>
 </template>

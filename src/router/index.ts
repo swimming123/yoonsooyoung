@@ -8,6 +8,8 @@ declare module 'vue-router' {
     title?: string
     /** 본문 폭 제한 없이 넓게 보여줄 화면 */
     wide?: boolean
+    /** 사이트 머리글 없이 화면 전체를 쓰는 페이지(공개 청첩장) */
+    bare?: boolean
   }
 }
 
@@ -39,6 +41,18 @@ export const router = createRouter({
       name: 'wedding',
       component: () => import('@/features/wedding/WeddingView.vue'),
       meta: { requiresOwner: true, title: '웨딩플래너', wide: true },
+    },
+    {
+      path: '/wedding/invitation',
+      name: 'invitation-editor',
+      component: () => import('@/features/invitation/InvitationEditorView.vue'),
+      meta: { requiresOwner: true, title: '청첩장 만들기', wide: true },
+    },
+    {
+      path: '/invite',
+      name: 'invite',
+      component: () => import('@/features/invitation/InvitationPublicView.vue'),
+      meta: { bare: true },
     },
     {
       path: '/login',
