@@ -41,10 +41,15 @@ const style = computed(() => ({
   '--inv-scale': { S: '1', M: '1.08', L: '1.16' }[props.card.template.fontSize],
 }))
 
+// 메인 사진: 지정한 사진 → 메인으로 올린 사진. 나머지(기존 웨딩플래너 사진 포함)는 갤러리.
 const mainPhoto = computed(
-  () => props.photos.find((p) => p.id === props.card.main.photoId) ?? props.photos.find((p) => p.role === 'main'),
+  () =>
+    props.photos.find((p) => p.id === props.card.main.photoId) ??
+    props.photos.find((p) => p.role === 'main') ??
+    // 기존 웨딩플래너에서 사진만 올려 둔 시안은 첫 사진을 메인으로
+    (props.card.main.photoId ? undefined : props.photos[0]),
 )
-const gallery = computed(() => props.photos.filter((p) => p.role === 'gallery'))
+const gallery = computed(() => props.photos.filter((p) => p.role !== 'main' && p.id !== mainPhoto.value?.id))
 const md = computed(() => monthDay(props.card.wedding.date))
 const dateLong = computed(() => formatDateLong(props.card.wedding.date))
 const time = computed(() => formatTime(props.card.wedding.hour, props.card.wedding.minute))

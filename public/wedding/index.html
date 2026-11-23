@@ -452,6 +452,8 @@
     .summary-strip{ flex-wrap:wrap; }
     .summary-cell{ flex:1 1 50%; border-bottom:1px solid var(--border); }
   }
+.invite-new-editor{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px;padding:10px 14px;border-radius:10px;background:#fdeef1;color:#8a3a4d;font-size:13px}
+.invite-new-editor a{text-decoration:none;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -605,6 +607,10 @@
           <span class="info-save-state" id="inviteSaveState"></span>
         </div>
         <div class="mb-tabbar" id="inviteTabBar"></div>
+        <div class="invite-new-editor" id="inviteNewEditor">
+          <span id="inviteNewEditorText">새 편집 화면에서 테마·글꼴·갤러리·계좌·달력까지 꾸밀 수 있어요.</span>
+          <a id="inviteNewEditorLink" class="btn-ghost" target="_top" href="invitation">새 편집 화면에서 꾸미기 →</a>
+        </div>
       </div>
 
       <div class="block" style="padding:16px; margin-bottom:16px;" id="inviteDraftActions">
@@ -1676,6 +1682,13 @@ function bindMetaEditor(){
 
 function renderInviteAll(force){
   if(!curDraft()) return;
+  // 새 청첩장 편집 화면(같은 시안 데이터를 씀)으로 가는 링크
+  const ne = document.getElementById('inviteNewEditorLink');
+  if(ne) ne.href = 'invitation?d=' + encodeURIComponent(curDraft().id);
+  const nt = document.getElementById('inviteNewEditorText');
+  if(nt) nt.textContent = curDraft().card
+    ? '이 시안은 새 편집 화면에서 꾸민 디자인이에요. 하객 링크도 새 디자인으로 열려요. 아래 블록 편집은 새 디자인에 반영되지 않아요.'
+    : '새 편집 화면에서 테마·글꼴·갤러리·계좌·달력까지 꾸밀 수 있어요.';
   renderInviteTabs();
   renderInviteForm(force);
   renderInviteBlocks(force);
