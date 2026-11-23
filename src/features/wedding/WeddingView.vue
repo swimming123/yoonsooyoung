@@ -15,7 +15,7 @@ const invite = `${base}invite.html`
     <nav class="links">
       <a :href="editor" target="_blank" rel="noopener">새 창에서 열기 ↗</a>
       <a :href="timeline" target="_blank" rel="noopener">공개 타임라인 ↗</a>
-      <RouterLink :to="{ name: 'invitation-editor' }">새 청첩장 만들기</RouterLink>
+      <RouterLink :to="{ name: 'invitation-editor' }">청첩장 꾸미기</RouterLink>
       <a :href="invite" target="_blank" rel="noopener">기존 모바일 청첩장 ↗</a>
     </nav>
   </div>

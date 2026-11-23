@@ -1,6 +1,5 @@
-// 모바일 청첩장 데이터 구조.
-// Firestore 의 app/invitation 문서 안 `card` 필드에 통째로 저장합니다.
-// (기존 웨딩플래너가 쓰는 drafts·activeId 필드는 건드리지 않습니다.)
+// 모바일 청첩장 디자인 데이터.
+// 기존 웨딩플래너의 시안(app/invitation 문서의 drafts.{id}) 안 `card` 필드에 저장합니다.
 
 export type ThemeColor = 'pink' | 'beige' | 'green' | 'gray' | 'purple'
 export type FontKey = 'pretendard' | 'gowunBatang' | 'gowunDodum' | 'nanumMyeongjo' | 'notoSerif' | 'hahmlet'
@@ -106,23 +105,22 @@ export interface InvitationCard {
 
 export interface InvitationPhoto {
   id: string
-  inviteId: string
-  role: 'main' | 'gallery'
+  /** 시안 id. 기존 웨딩플래너 사진은 비어 있으면 'main' 시안 것 */
+  inviteId?: string
+  /** 새 편집 화면에서 올린 사진만 있음. 없으면 갤러리 사진으로 봄 */
+  role?: 'main' | 'gallery'
   order: number
   /** data URL (Firestore 문서 하나 1MB 제한 때문에 압축해서 저장) */
   image: string
   kb?: number
 }
 
-/** 사진을 기존 웨딩플래너 시안과 구분하는 값 */
-export const CARD_INVITE_ID = 'card'
-
 export const THEME_COLORS: { key: ThemeColor; label: string; base: string; point: string; isNew?: boolean }[] = [
   { key: 'pink', label: '핑크', base: '#fbf1f1', point: '#c8737f' },
   { key: 'beige', label: '베이지', base: '#f6f0e6', point: '#a7845a' },
   { key: 'green', label: '그린', base: '#eef3ec', point: '#5e8061' },
   { key: 'gray', label: '그레이', base: '#f2f2f2', point: '#5f6368' },
-  { key: 'purple', label: '퍼플', base: '#f3effa', point: '#8569b3', isNew: true },
+  { key: 'purple', label: '퍼플', base: '#f3effa', point: '#8569b3' },
 ]
 
 export const FONTS: { key: FontKey; label: string; family: string; google?: string }[] = [

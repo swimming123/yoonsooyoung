@@ -411,8 +411,15 @@ function observeReveal(){
 }
 
 function render(){
-  if(!gotInv || !gotPhotos) return;
-  const { id, d, blocks } = pickDraft();
+  if(!gotInv) return;
+  const picked = pickDraft();
+  // 새 청첩장 편집 화면(사이트의 /wedding/invitation)에서 꾸민 시안이면 새 디자인 페이지로 이동
+  if(picked.d && picked.d.card){
+    location.replace('../invite' + (wantedId ? '?d=' + encodeURIComponent(picked.id) : ''));
+    return;
+  }
+  if(!gotPhotos) return;
+  const { id, d, blocks } = picked;
   applyMeta(d);
   const list = photos.filter(p => (p.inviteId || 'main') === id);
   const card = $('#card'), content = $('#content');

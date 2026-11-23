@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import { onBeforeRouteLeave, useRouter } from 'vue-router'
+import { RouterLink } from 'vue-router'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import AccountList from './editor/AccountList.vue'
 import ChoiceGroup from './editor/ChoiceGroup.vue'
 import EditorSection from './editor/EditorSection.vue'
@@ -8,7 +9,14 @@ import FormRow from './editor/FormRow.vue'
 import PersonFields from './editor/PersonFields.vue'
 import PhotoDrop from './editor/PhotoDrop.vue'
 import InvitationPreview from './InvitationPreview.vue'
-import { compressImage, invitationRepository, newPhoto, type InvitationRepository } from './repository'
+import {
+  compressImage,
+  describeError,
+  invitationRepository,
+  newPhoto,
+  type DraftSummary,
+  type InvitationRepository,
+} from './repository'
 import {
   FALLING_EFFECTS,
   FONTS,
@@ -23,7 +31,12 @@ import { useInvitationFonts } from './useInvitationFonts'
 type Tab = 'basic' | 'extra' | 'share'
 
 const router = useRouter()
+const route = useRoute()
 const card = ref<InvitationCard>(defaultCard())
+const drafts = ref<DraftSummary[]>([])
+const activeId = ref('')
+const draftId = ref('')
+const switching = ref(false)
 const photos = ref<InvitationPhoto[]>([])
 const loading = ref(true)
 const loadError = ref('')
@@ -42,14 +55,19 @@ const previewScroller = ref<HTMLElement>()
 
 let repo: InvitationRepository | undefined
 let stopPhotos: (() => void) | undefined
+let stopState: (() => void) | undefined
 
 // 편집 화면에서는 글꼴 미리보기를 위해 전부 불러옵니다.
 useInvitationFonts(() => FONTS.map((f) => f.key))
 
 const dirty = computed(() => !loading.value && JSON.stringify(card.value) !== savedJson.value)
 const mainPhoto = computed(() => photos.value.find((p) => p.id === card.value.main.photoId))
-const galleryPhotos = computed(() => photos.value.filter((p) => p.role === 'gallery'))
-const publicUrl = computed(() => new URL(router.resolve({ name: 'invite' }).href, location.origin).href)
+const galleryPhotos = computed(() => photos.value.filter((p) => p.role !== 'main' && p.id !== card.value.main.photoId))
+const isActive = computed(() => draftId.value === activeId.value)
+const publicUrl = computed(() => {
+  const query = isActive.value ? {} : { d: draftId.value }
+  return new URL(router.resolve({ name: 'invite', query }).href, location.origin).href
+})
 const saveLabel = computed(() => {
   if (saving.value) return '저장 중…'
   if (saveError.value) return saveError.value
@@ -61,19 +79,83 @@ const saveLabel = computed(() => {
 onMounted(async () => {
   try {
     repo = await invitationRepository()
-    card.value = await repo.loadCard()
-    savedJson.value = JSON.stringify(card.value)
-    stopPhotos = repo.watchPhotos((list) => (photos.value = list))
+    let first = true
+    stopState = repo.watchState(
+      (state) => {
+        drafts.value = state.drafts
+        activeId.value = state.activeId
+        if (first) {
+          first = false
+          const wanted = String(route.query.d ?? '')
+          void openDraft(state.drafts.some((d) => d.id === wanted) ? wanted : state.activeId)
+        }
+      },
+      (e) => {
+        loadError.value = describeError(e)
+        loading.value = false
+      },
+    )
   } catch (e) {
-    loadError.value = e instanceof Error ? e.message : String(e)
-  } finally {
+    loadError.value = describeError(e)
     loading.value = false
   }
   window.addEventListener('beforeunload', warnUnsaved)
 })
 
+/** 시안을 열어 편집합니다. */
+async function openDraft(id: string) {
+  if (!repo || !id) return
+  switching.value = true
+  try {
+    const loaded = await repo.loadCard(id)
+    stopPhotos?.()
+    draftId.value = id
+    card.value = loaded
+    savedJson.value = JSON.stringify(loaded)
+    savedAt.value = null
+    saveError.value = ''
+    stopPhotos = repo.watchPhotos(id, (list) => (photos.value = list))
+    if (route.query.d !== id) void router.replace({ query: { ...route.query, d: id } })
+  } catch (e) {
+    loadError.value = describeError(e)
+  } finally {
+    loading.value = false
+    switching.value = false
+  }
+}
+
+async function changeDraft(id: string) {
+  if (id === draftId.value) return
+  if (dirty.value && !confirm('저장하지 않은 변경 사항이 있어요. 다른 시안으로 넘어갈까요?')) return
+  await openDraft(id)
+}
+
+async function makeActive() {
+  try {
+    await repo?.setActive(draftId.value)
+  } catch (e) {
+    saveError.value = describeError(e)
+  }
+}
+
+async function addDraft() {
+  if (!repo) return
+  const name = prompt('새 시안 이름', `시안 ${drafts.value.length + 1}`)?.trim()
+  if (!name) return
+  try {
+    // 지금 보고 있는 디자인을 복사해서 시작합니다(사진은 새 시안에서 따로 올려요).
+    const copy: InvitationCard = JSON.parse(JSON.stringify(card.value))
+    copy.main.photoId = ''
+    const id = await repo.createDraft(name, copy)
+    await openDraft(id)
+  } catch (e) {
+    saveError.value = describeError(e)
+  }
+}
+
 onBeforeUnmount(() => {
   stopPhotos?.()
+  stopState?.()
   window.removeEventListener('beforeunload', warnUnsaved)
 })
 
@@ -100,14 +182,14 @@ async function save() {
   saving.value = true
   saveError.value = ''
   try {
-    await repo.saveCard(card.value)
+    await repo.saveCard(draftId.value, card.value)
     savedJson.value = JSON.stringify(card.value)
     savedAt.value = new Date()
     // 메인 사진을 바꿨다면 이전 메인 사진은 이제 정리합니다.
     const stale = photos.value.filter((p) => p.role === 'main' && p.id !== card.value.main.photoId)
     await Promise.all(stale.map((p) => repo!.deletePhoto(p.id)))
   } catch (e) {
-    saveError.value = '저장하지 못했어요. ' + (e instanceof Error ? e.message : '')
+    saveError.value = '저장하지 못했어요. ' + describeError(e)
   } finally {
     saving.value = false
   }
@@ -119,7 +201,7 @@ async function uploadMain(files: File[]) {
   photoError.value = ''
   try {
     const { url, kb } = await compressImage(files[0])
-    const photo = newPhoto('main', 0, url, kb)
+    const photo = newPhoto(draftId.value, 'main', -1, url, kb)
     await repo.savePhoto(photo)
     card.value.main.photoId = photo.id
   } catch (e) {
@@ -137,7 +219,7 @@ async function uploadGallery(files: File[]) {
     let order = galleryPhotos.value.reduce((m, p) => Math.max(m, p.order), -1)
     for (const file of files.slice(0, 30 - galleryPhotos.value.length)) {
       const { url, kb } = await compressImage(file, 1280, 600)
-      await repo.savePhoto(newPhoto('gallery', ++order, url, kb))
+      await repo.savePhoto(newPhoto(draftId.value, 'gallery', ++order, url, kb))
     }
   } catch (e) {
     photoError.value = e instanceof Error ? e.message : '사진을 올리지 못했어요.'
@@ -195,7 +277,24 @@ const tabs: { key: Tab; label: string; icon: string }[] = [
         </div>
       </div>
 
-      <p v-if="loadError" class="error">청첩장을 불러오지 못했어요: {{ loadError }}</p>
+      <p v-if="loadError" class="error">청첩장을 불러오지 못했어요. {{ loadError }}</p>
+
+      <!-- 시안: 기존 웨딩플래너 '청첩장 관리'와 같은 목록 -->
+      <div v-if="drafts.length" class="drafts">
+        <label class="drafts-label" for="draft-select">시안</label>
+        <select id="draft-select" :value="draftId" :disabled="switching" @change="changeDraft(($event.target as HTMLSelectElement).value)">
+          <option v-for="d in drafts" :key="d.id" :value="d.id">
+            {{ d.id === activeId ? '★ ' : '' }}{{ d.name }}{{ d.hasCard ? '' : ' (기존 블록 디자인)' }}
+          </option>
+        </select>
+        <span v-if="isActive" class="badge-active">대표 시안 · 하객 링크에 보여요</span>
+        <button v-else type="button" class="small" @click="makeActive">대표 시안으로 지정</button>
+        <button type="button" class="small" @click="addDraft">+ 새 시안</button>
+        <RouterLink class="small link" :to="{ name: 'wedding' }">웨딩플래너로 ↩</RouterLink>
+      </div>
+      <p v-if="drafts.find((d) => d.id === draftId && !d.hasCard)" class="note legacy-note">
+        이 시안은 아직 기존 블록 디자인이에요. 이름·일시·장소·사진은 그대로 가져왔고, 여기서 저장하면 하객 링크가 새 디자인으로 바뀌어요.
+      </p>
 
       <div class="layout">
         <!-- 미리보기 -->
@@ -435,7 +534,10 @@ const tabs: { key: Tab; label: string; icon: string }[] = [
                 <input :value="publicUrl" readonly aria-label="청첩장 주소" @focus="($event.target as HTMLInputElement).select()" />
                 <button type="button" @click="copyUrl">{{ copied ? '복사됨' : '복사' }}</button>
               </div>
-              <p class="note">저장하기를 눌러야 공개 페이지에 반영돼요. 이 주소는 누구나 볼 수 있어요.</p>
+              <p class="note">
+                {{ isActive ? '대표 시안이라 기존 하객 링크(wedding/invite.html)도 이 디자인으로 열려요.' : '대표 시안이 아니라서 이 주소로만 볼 수 있어요.' }}
+                저장하기를 눌러야 반영돼요.
+              </p>
               <label class="check-row"><input v-model="card.share.showLinkCopy" type="checkbox" /> 청첩장 아래에 '주소 복사' 버튼 보여 주기</label>
             </EditorSection>
             <EditorSection v-model:open="open.shareText" title="공유 문구">
@@ -446,7 +548,7 @@ const tabs: { key: Tab; label: string; icon: string }[] = [
                 <input id="s-desc" v-model="card.share.description" placeholder="예: 11월 23일 낮 12시, 서울 ○○호텔" />
               </FormRow>
               <p class="note">
-                브라우저 탭 제목과 휴대폰의 '공유하기'에 쓰여요. 카카오톡 링크 미리보기(사진·문구)는 아직 기존 청첩장 설정을 따라요.
+                브라우저 탭 제목에 쓰여요. 카카오톡 링크 미리보기(사진·문구)는 웨딩플래너 '청첩장 관리'의 링크 미리보기 설정을 그대로 따라요.
               </p>
             </EditorSection>
           </div>
@@ -488,6 +590,13 @@ const tabs: { key: Tab; label: string; icon: string }[] = [
 .ghost:hover { text-decoration: none; filter: brightness(0.97); }
 .primary { border: 0; background: var(--ed-brand); color: #fff; font-weight: 600; }
 .primary:disabled { background: #d9d9de; color: #8a8a90; cursor: not-allowed; }
+.drafts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 16px 20px 0; }
+.drafts-label { font-weight: 700; font-size: 0.9rem; }
+.drafts select { width: auto !important; min-width: 200px; background: #fff !important; border: 1px solid var(--ed-line) !important; }
+.small { min-height: 40px; padding: 0 14px; border: 1px solid var(--ed-line); border-radius: 8px; background: #fff; color: #495057; font-size: 0.88rem; }
+.small.link { display: inline-flex; align-items: center; text-decoration: none; }
+.badge-active { padding: 4px 10px; border-radius: 999px; background: var(--ed-brand-soft); color: var(--ed-brand-strong); font-size: 0.8rem; font-weight: 600; }
+.legacy-note { margin: 12px 20px 0; background: #fff8e6; color: #7a5a00; }
 .layout { display: flex; gap: 32px; justify-content: center; padding: 32px 20px 64px; }
 .phone-col { position: sticky; top: 88px; align-self: flex-start; flex-shrink: 0; }
 .phone {
