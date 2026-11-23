@@ -60,7 +60,8 @@ let stopState: (() => void) | undefined
 // 편집 화면에서는 글꼴 미리보기를 위해 전부 불러옵니다.
 useInvitationFonts(() => FONTS.map((f) => f.key))
 
-const dirty = computed(() => !loading.value && JSON.stringify(card.value) !== savedJson.value)
+// 시안을 못 불러왔으면(권한 오류 등) 저장할 것도 없음
+const dirty = computed(() => !loading.value && !!draftId.value && JSON.stringify(card.value) !== savedJson.value)
 const mainPhoto = computed(() => photos.value.find((p) => p.id === card.value.main.photoId))
 const galleryPhotos = computed(() => photos.value.filter((p) => p.role !== 'main' && p.id !== card.value.main.photoId))
 const isActive = computed(() => draftId.value === activeId.value)
