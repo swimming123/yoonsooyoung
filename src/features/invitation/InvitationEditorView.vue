@@ -301,7 +301,7 @@ const tabs: { key: Tab; label: string; icon: string }[] = [
         <!-- 미리보기 -->
         <aside class="phone-col" :class="{ show: mobilePreview }">
           <button type="button" class="close-preview only-mobile" @click="mobilePreview = false">✕ 닫기</button>
-          <div ref="previewScroller" class="phone" aria-label="청첩장 미리보기">
+          <div ref="previewScroller" class="phone" aria-label="청첩장 미리보기" data-tilt-root>
             <InvitationPreview :card="card" :photos="photos" :intro-key="introKey" :share-url="publicUrl" embedded />
           </div>
         </aside>
@@ -385,6 +385,13 @@ const tabs: { key: Tab; label: string; icon: string }[] = [
                   label="떨어지는 효과"
                   :options="FALLING_EFFECTS.map((f) => ({ value: f.key, label: f.label }))"
                 />
+                <label v-if="card.main.falling !== 'none'" class="check-row tilt-row">
+                  <input v-model="card.main.motion" type="checkbox" />
+                  휴대폰을 기울이면 그쪽으로 날리고, 흔들면 흩날리기
+                </label>
+                <p v-if="card.main.falling !== 'none' && card.main.motion" class="sub-hint">
+                  PC 미리보기에서는 휴대폰 화면 위에서 마우스를 움직여 보세요.
+                </p>
               </FormRow>
               <FormRow label="인트로 효과">
                 <ChoiceGroup
@@ -647,6 +654,8 @@ const tabs: { key: Tab; label: string; icon: string }[] = [
 .switch input:focus-visible + span { outline: 2px solid var(--ed-brand); outline-offset: 2px; }
 .check-row { display: flex; align-items: center; gap: 10px; font-size: 0.92rem; min-height: 32px; cursor: pointer; }
 .check-row input { width: 18px; height: 18px; accent-color: var(--ed-brand); }
+.tilt-row { margin-top: 10px; }
+.sub-hint { margin: 4px 0 0; color: var(--ed-sub); font-size: 0.8rem; }
 .note { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--ed-soft); color: var(--ed-sub); font-size: 0.82rem; }
 .thumbs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
 .thumbs li { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: #eee; }

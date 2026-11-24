@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
   calendarCells,
   ddayText,
@@ -14,7 +14,8 @@ import {
   tmapUrl,
   venueLine,
 } from './format'
-import { FALLING_EFFECTS, FONTS, THEME_COLORS, type Account, type InvitationCard, type InvitationPhoto } from './types'
+import ParticleLayer from './ParticleLayer.vue'
+import { FONTS, THEME_COLORS, type Account, type InvitationCard, type InvitationPhoto } from './types'
 import { useInvitationFonts } from './useInvitationFonts'
 
 const props = withDefaults(
@@ -63,13 +64,14 @@ const parentRows = computed(() => [
   { role: '신부', parents: brideParents.value, relation: props.card.bride.relation, name: props.card.bride.name },
 ])
 const greetingLines = computed(() => props.card.greeting.body.split('\n'))
-const fallingChar = computed(() => FALLING_EFFECTS.find((f) => f.key === props.card.main.falling)?.char ?? '')
-const fallers = Array.from({ length: 14 }, (_, i) => ({
-  left: (i * 37) % 100,
-  delay: (i * 1.3) % 9,
-  duration: 8 + ((i * 7) % 6),
-  size: 10 + ((i * 5) % 9),
-}))
+// 하객 휴대폰에서만 잠깐 보여 주는 안내
+const tiltHint = ref(false)
+onMounted(() => {
+  if (props.embedded || props.card.main.falling === 'none' || !props.card.main.motion) return
+  if (!matchMedia('(pointer: coarse)').matches) return
+  setTimeout(() => (tiltHint.value = true), 1500)
+  setTimeout(() => (tiltHint.value = false), 7000)
+})
 
 const transports = computed(() =>
   [
@@ -105,6 +107,11 @@ const contacts = computed(() => {
 // ───── 복사 알림 ─────
 const toast = ref('')
 let toastTimer: ReturnType<typeof setTimeout> | undefined
+function showToast(message: string) {
+  toast.value = message
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => (toast.value = ''), 1800)
+}
 async function copy(text: string, message: string) {
   try {
     await navigator.clipboard.writeText(text)
@@ -156,15 +163,19 @@ function move(step: number) {
 
 <template>
   <div class="inv" :class="{ embedded }" :style="style">
-    <!-- 떨어지는 효과 -->
-    <div v-if="fallingChar" class="falling" aria-hidden="true">
-      <span
-        v-for="(f, i) in fallers"
-        :key="i"
-        :style="{ left: `${f.left}%`, animationDelay: `${f.delay}s`, animationDuration: `${f.duration}s`, fontSize: `${f.size}px` }"
-        >{{ fallingChar }}</span
-      >
+    <!-- 떨어지는 효과: 휴대폰을 기울이면 그쪽으로 날리고, 흔들면 흩날려요 -->
+    <div v-if="card.main.falling !== 'none'" class="falling">
+      <ParticleLayer
+        :effect="card.main.falling"
+        :color="theme.point"
+        :motion="card.main.motion"
+        :embedded="embedded"
+        @shake="showToast('🌸 축하해 주셔서 감사합니다')"
+      />
     </div>
+    <Transition name="fade">
+      <p v-if="tiltHint" class="tilt-hint">화면을 톡 누르고 휴대폰을 기울여 보세요</p>
+    </Transition>
 
     <!-- 인트로 -->
     <Transition name="intro">
@@ -478,19 +489,13 @@ section { padding: 64px 28px; position: relative; }
 }
 .inv-foot { padding: 20px 0 36px; font-family: 'Cormorant Garamond', serif; font-size: 0.85em; color: #b4b4ba; letter-spacing: 0.1em; }
 
-/* 떨어지는 효과 */
-.falling { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
+/* 떨어지는 효과 (캔버스는 ParticleLayer) */
+.falling { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
 .embedded .falling { position: sticky; top: 0; height: 660px; margin-bottom: -660px; }
-.falling span { position: absolute; top: -24px; color: var(--inv-point); opacity: 0.75; animation: fall linear infinite; }
-@keyframes fall {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  50% { transform: translate(24px, 50vh) rotate(160deg); }
-  100% { transform: translate(-12px, 105vh) rotate(320deg); }
-}
-.embedded .falling span { animation-name: fall-embedded; }
-@keyframes fall-embedded {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  100% { transform: translate(-12px, 720px) rotate(320deg); }
+.tilt-hint {
+  position: fixed; left: 50%; top: 16px; transform: translateX(-50%); z-index: 30; margin: 0;
+  padding: 7px 14px; border-radius: 999px; background: rgba(255, 255, 255, 0.92); color: var(--inv-point);
+  font-size: 0.78em; white-space: nowrap; box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.25);
 }
 
 /* 인트로 */

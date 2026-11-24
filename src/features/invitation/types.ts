@@ -47,6 +47,8 @@ export interface InvitationCard {
     textRight: string
     background: BackgroundEffect
     falling: FallingEffect
+    /** 휴대폰 기울기(자이로)·흔들기(가속도)에 파티클이 반응할지 */
+    motion: boolean
     /** invitationPhotos 문서 id (role=main) */
     photoId: string
     intro: IntroEffect
@@ -178,6 +180,7 @@ export function defaultCard(today = new Date()): InvitationCard {
       textRight: '신부',
       background: 'none',
       falling: 'none',
+      motion: true,
       photoId: '',
       intro: 'none',
       introText: '',
